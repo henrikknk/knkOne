@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "appId": "f3dea26c-13f0-41ca-b453-fa93eba673ac",
+  "appDisplayName": "knkOne",
+  "region": "prod",
+  "appType": "CodeApp",
+  "environmentId": "4ce29894-044d-e3ec-9ae5-cc6cd8ff0544",
+  "description": " ",
+  "buildPath": "./dist",
+  "buildEntryPoint": "index.html",
+  "localAppUrl": "http://localhost:3000",
+  "logoPath": "Default",
+  "connectionReferences": {
+    "d90c057f-a733-465a-a33b-ccf15b724f62": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+      "displayName": "Office 365 Outlook",
+      "dataSources": [
+        "office365"
+      ],
+      "dataSets": {}
+    }
+  },
+  "databaseReferences": {
+    "default.cds": {
+      "dataSources": {
+        "leads": {
+          "entitySetName": "leads",
+          "logicalName": "lead",
+          "isHidden": false
+        },
+        "opportunities": {
+          "entitySetName": "opportunities",
+          "logicalName": "opportunity",
+          "isHidden": false
+        },
+        "users": {
+          "entitySetName": "systemusers",
+          "logicalName": "systemuser",
+          "isHidden": false
+        },
+        "activities": {
+          "entitySetName": "activitypointers",
+          "logicalName": "activitypointer",
+          "isHidden": false
+        }
+      },
+      "environmentVariableName": ""
+    }
+  }
+}
