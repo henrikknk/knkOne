@@ -12,6 +12,1679 @@ export const dataSourcesInfo = {
     "dataSourceType": "Dataverse",
     "apis": {}
   },
+  "jira": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "",
+    "dataSourceType": "Connector",
+    "apis": {
+      "EditIssue": {
+        "path": "/{connectionId}/3/issue/{issueIdOrKey}",
+        "method": "PUT",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueIdOrKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "notifyUsers",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "overrideScreenSecurity",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "overrideEditableFlag",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          },
+          "204": {
+            "type": "object"
+          },
+          "400": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "EditIssue_V2": {
+        "path": "/{connectionId}/v2/3/issue/{issueIdOrKey}",
+        "method": "PUT",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueIdOrKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "notifyUsers",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "overrideScreenSecurity",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "overrideEditableFlag",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          },
+          "204": {
+            "type": "object"
+          },
+          "400": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "DeleteProject": {
+        "path": "/{connectionId}/3/project/{projectIdOrKey}",
+        "method": "DELETE",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectIdOrKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "enableUndo",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responseInfo": {
+          "204": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "UpdateProject": {
+        "path": "/{connectionId}/3/project/{projectIdOrKey}",
+        "method": "PUT",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectIdOrKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "400": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "DeleteProject_V2": {
+        "path": "/{connectionId}/v2/project/{projectIdOrKey}",
+        "method": "DELETE",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectIdOrKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "enableUndo",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responseInfo": {
+          "204": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "UpdateProject_V2": {
+        "path": "/{connectionId}/v2/project/{projectIdOrKey}",
+        "method": "PUT",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectIdOrKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "400": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "GetAllProjectCategories": {
+        "path": "/{connectionId}/3/projectCategory",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          },
+          "401": {
+            "type": "void"
+          }
+        }
+      },
+      "CreateProjectCategory": {
+        "path": "/{connectionId}/3/projectCategory",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          },
+          "400": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "409": {
+            "type": "void"
+          }
+        }
+      },
+      "GetAllProjectCategories_V2": {
+        "path": "/{connectionId}/v2/projectCategory",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          },
+          "401": {
+            "type": "void"
+          }
+        }
+      },
+      "CreateProjectCategory_V2": {
+        "path": "/{connectionId}/v2/projectCategory",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          },
+          "400": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "409": {
+            "type": "void"
+          }
+        }
+      },
+      "RemoveProjectCategory": {
+        "path": "/{connectionId}/3/projectCategory/{id}",
+        "method": "DELETE",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responseInfo": {
+          "204": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "RemoveProjectCategory_V2": {
+        "path": "/{connectionId}/v2/projectCategory/{id}",
+        "method": "DELETE",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responseInfo": {
+          "204": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "GetTask": {
+        "path": "/{connectionId}/3/task/{taskId}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "GetTask_V2": {
+        "path": "/{connectionId}/v2/task/{taskId}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "CancelTask": {
+        "path": "/{connectionId}/3/task/{taskId}/cancel",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Atlassian-Token",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          },
+          "202": {
+            "type": "object"
+          },
+          "400": {
+            "type": "array"
+          },
+          "401": {
+            "type": "array"
+          },
+          "403": {
+            "type": "array"
+          },
+          "404": {
+            "type": "array"
+          }
+        }
+      },
+      "CancelTask_V2": {
+        "path": "/{connectionId}/v2/task/{taskId}/cancel",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Atlassian-Token",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          },
+          "202": {
+            "type": "object"
+          },
+          "400": {
+            "type": "array"
+          },
+          "401": {
+            "type": "array"
+          },
+          "403": {
+            "type": "array"
+          },
+          "404": {
+            "type": "array"
+          }
+        }
+      },
+      "GetUser": {
+        "path": "/{connectionId}/3/user",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "GetUser_V2": {
+        "path": "/{connectionId}/v2/user",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "CreateIssue": {
+        "path": "/{connectionId}/issue",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "CreateIssueV2": {
+        "path": "/{connectionId}/v2/issue",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueTypeIds",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "item",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "CreateIssue_V3": {
+        "path": "/{connectionId}/v3/issue",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueTypeIds",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "item",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "GetIssue": {
+        "path": "/{connectionId}/issue/{issueKey}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "GetIssue_V2": {
+        "path": "/{connectionId}/v2/issue/{issueKey}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "AddComment": {
+        "path": "/{connectionId}/issue/{issueKey}/comment",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "AddComment_V2": {
+        "path": "/{connectionId}/v2/issue/{issueKey}/comment",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "ListProjects": {
+        "path": "/{connectionId}/project",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "CreateProject": {
+        "path": "/{connectionId}/project",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Project",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "CreateProject_V2": {
+        "path": "/{connectionId}/v2/project",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Project",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "ListProjects_V2": {
+        "path": "/{connectionId}/project/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "ListProjects_V3": {
+        "path": "/{connectionId}/v2/project/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "ListProjectUsers": {
+        "path": "/{connectionId}/user/permission/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "ListProjectUsers_V2": {
+        "path": "/{connectionId}/v2/user/permission/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "ListFilters": {
+        "path": "/{connectionId}/2/filter/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "ListFilters_V2": {
+        "path": "/{connectionId}/v2/filter/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "ListResources": {
+        "path": "/{connectionId}/oauth/token/accessible-resources",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "ListIssues": {
+        "path": "/{connectionId}/2/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "jql",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "nextPageToken",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "400": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          }
+        }
+      },
+      "ListIssues_Datacenter": {
+        "path": "/{connectionId}/datacenter/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "400": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          }
+        }
+      },
+      "ListTransitions": {
+        "path": "/{connectionId}/3/issue/{issueIdOrKey}/transitions",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueIdOrKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "401": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "UpdateTransition": {
+        "path": "/{connectionId}/3/issue/{issueIdOrKey}/transitions",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "issueIdOrKey",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "204": {
+            "type": "object"
+          },
+          "400": {
+            "type": "void"
+          },
+          "401": {
+            "type": "void"
+          },
+          "403": {
+            "type": "void"
+          },
+          "404": {
+            "type": "void"
+          }
+        }
+      },
+      "GetCurrentUser": {
+        "path": "/{connectionId}/3/myself",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "expand",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "401": {
+            "type": "void"
+          }
+        }
+      },
+      "OnNewIssue": {
+        "path": "/{connectionId}/new_issue_trigger/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnNewIssue_V2": {
+        "path": "/{connectionId}/v2/new_issue_trigger/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnNewIssue_Datacenter": {
+        "path": "/{connectionId}/datacenter/new_issue_trigger/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnCloseIssue": {
+        "path": "/{connectionId}/close_issue_trigger/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnCloseIssue_V2": {
+        "path": "/{connectionId}/v2/close_issue_trigger/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnCloseIssue_Datacenter": {
+        "path": "/{connectionId}/datacenter/close_issue_trigger/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectKey",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnNewIssueJQL": {
+        "path": "/{connectionId}/new_issue_jql_trigger/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "jql",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnNewIssueJQL_V2": {
+        "path": "/{connectionId}/v2/new_issue_jql_trigger/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "jql",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnNewIssueJQL_Datacenter": {
+        "path": "/{connectionId}/datacenter/new_issue_jql_trigger/search",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "jql",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Request-Jirainstance",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "mcp_JiraIssueManagement": {
+        "path": "/{connectionId}/mcp/JiraIssueManagement",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "queryRequest",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          },
+          {
+            "name": "sessionId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          },
+          "default": {
+            "type": "void"
+          }
+        }
+      }
+    }
+  },
+  "knk_contracttypes": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "knk_contracttypeid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "knk_subscriptions": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "knk_subscriptionid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "knk_subscriptionservices": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "knk_subscriptionserviceid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
   "leads": {
     "tableId": "",
     "version": "",
@@ -5389,5 +7062,697 @@ export const dataSourcesInfo = {
     "primaryKey": "systemuserid",
     "dataSourceType": "Dataverse",
     "apis": {}
+  },
+  "todo": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "",
+    "dataSourceType": "Connector",
+    "apis": {
+      "OnNewToDo": {
+        "path": "/{connectionId}/trigger/onNewToDo",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnNewToDoInFolder": {
+        "path": "/{connectionId}/trigger/onNewToDoInFolder/{folderId}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnUpdateToDo": {
+        "path": "/{connectionId}/trigger/onUpdateToDo",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnUpdateToDoInFolder": {
+        "path": "/{connectionId}/trigger/onUpdateToDoInFolder/{folderId}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "GetAllTodoListsV2": {
+        "path": "/{connectionId}/lists",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "CreateToDoListV2": {
+        "path": "/{connectionId}/lists",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "GetToDoListV2": {
+        "path": "/{connectionId}/lists/{folderId}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "UpdateToDoList": {
+        "path": "/{connectionId}/lists/{folderId}",
+        "method": "PATCH",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "DeleteToDoList": {
+        "path": "/{connectionId}/lists/{folderId}",
+        "method": "DELETE",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "204": {
+            "type": "void"
+          }
+        }
+      },
+      "ListToDosByFolderV2": {
+        "path": "/{connectionId}/lists/{folderId}/tasks",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "CreateToDoV3": {
+        "path": "/{connectionId}/lists/{folderId}/tasks",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "GetToDoV3": {
+        "path": "/{connectionId}/lists/{folderId}/tasks/{id}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "UpdateToDoV2": {
+        "path": "/{connectionId}/lists/{folderId}/tasks/{id}",
+        "method": "PATCH",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "DeleteToDoV2": {
+        "path": "/{connectionId}/lists/{folderId}/tasks/{id}",
+        "method": "DELETE",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "204": {
+            "type": "void"
+          }
+        }
+      },
+      "GetAllTodoLists": {
+        "path": "/{connectionId}/taskfolders",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "CreateToDoList": {
+        "path": "/{connectionId}/taskfolders",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "GetToDoList": {
+        "path": "/{connectionId}/taskFolders/{id}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "ListToDosByFolder": {
+        "path": "/{connectionId}/taskFolders/{folderId}/tasks",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "ListAllToDos": {
+        "path": "/{connectionId}/tasks",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "CreateToDo": {
+        "path": "/{connectionId}/tasks",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "folderId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "CreateToDoV2": {
+        "path": "/{connectionId}/v2/tasks",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "folderId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "GetToDo": {
+        "path": "/{connectionId}/tasks/{id}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "UpdateToDo": {
+        "path": "/{connectionId}/tasks/{id}",
+        "method": "PATCH",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "object"
+          }
+        }
+      },
+      "DeleteToDo": {
+        "path": "/{connectionId}/tasks/{id}",
+        "method": "DELETE",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "204": {
+            "type": "void"
+          }
+        }
+      },
+      "GetToDoV2": {
+        "path": "/{connectionId}/v2/tasks/{id}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "OnNewToDoInFolderV2": {
+        "path": "/{connectionId}/v2/trigger/onNewToDoInFolder/{folderId}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      },
+      "OnUpdateToDoInFolderV2": {
+        "path": "/{connectionId}/v2/trigger/onUpdateToDoInFolder/{folderId}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "array"
+          }
+        }
+      }
+    }
   }
 };

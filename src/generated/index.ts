@@ -6,14 +6,24 @@
 // Models
 export * as ActivitypointersModel from './models/ActivitypointersModel';
 export * as CommonModels from './models/CommonModels';
+export * as JiraModel from './models/JiraModel';
+export * as Knk_contracttypesModel from './models/Knk_contracttypesModel';
+export * as Knk_subscriptionsModel from './models/Knk_subscriptionsModel';
+export * as Knk_subscriptionservicesModel from './models/Knk_subscriptionservicesModel';
 export * as LeadsModel from './models/LeadsModel';
+export * as MicrosoftTo_Do_Business_Model from './models/MicrosoftTo_Do_Business_Model';
 export * as Office365OutlookModel from './models/Office365OutlookModel';
 export * as OpportunitiesModel from './models/OpportunitiesModel';
 export * as SystemusersModel from './models/SystemusersModel';
 
 // Services
 export * from './services/ActivitypointersService';
+export * from './services/JiraService';
+export * from './services/Knk_contracttypesService';
+export * from './services/Knk_subscriptionsService';
+export * from './services/Knk_subscriptionservicesService';
 export * from './services/LeadsService';
+export * from './services/MicrosoftTo_Do_Business_Service';
 export * from './services/Office365OutlookService';
 export * from './services/OpportunitiesService';
 export * from './services/SystemusersService';

@@ -18,6 +18,23 @@
         "office365"
       ],
       "dataSets": {}
+    },
+    "d3815c63-14e5-4407-abed-0fa32ca5466b": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_jira",
+      "displayName": "Jira",
+      "dataSources": [
+        "jira"
+      ],
+      "authenticationType": "APIToken",
+      "dataSets": {}
+    },
+    "4a6d985f-8ea0-46f5-96a6-981accc5d7f3": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_todo",
+      "displayName": "Microsoft To-Do (Business)",
+      "dataSources": [
+        "todo"
+      ],
+      "dataSets": {}
     }
   },
   "databaseReferences": {
@@ -41,6 +58,21 @@
         "activities": {
           "entitySetName": "activitypointers",
           "logicalName": "activitypointer",
+          "isHidden": false
+        },
+        "vertr_ge": {
+          "entitySetName": "knk_subscriptions",
+          "logicalName": "knk_subscription",
+          "isHidden": false
+        },
+        "vertragsleistungen": {
+          "entitySetName": "knk_subscriptionservices",
+          "logicalName": "knk_subscriptionservice",
+          "isHidden": false
+        },
+        "vertragsart": {
+          "entitySetName": "knk_contracttypes",
+          "logicalName": "knk_contracttype",
           "isHidden": false
         }
       },

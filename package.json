@@ -29,5 +29,10 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4"
+  },
+  "allowScripts": {
+    "keytar@7.9.0": true,
+    "@azure/msal-node-extensions@1.5.17": true,
+    "@azure/msal-node-runtime@0.18.2": true
   }
 }
