@@ -129,6 +129,14 @@ export function dataverseTable<TRecord>(name: string): TableClient<TRecord> {
   }
 }
 
+/**
+ * Direktlink auf einen Datensatz im modellgesteuerten CRM, `orgUrl` z. B. aus getContext().app.dataverseOrgUrl.
+ * Beispiel: crmRecordUrl(orgUrl, 'opportunity', id)
+ */
+export function crmRecordUrl(orgUrl: string | undefined, entityLogicalName: string, id: string): string | undefined {
+  return orgUrl ? `${orgUrl.replace(/\/$/, '')}/main.aspx?pagetype=entityrecord&etn=${entityLogicalName}&id=${id}` : undefined
+}
+
 const formattedSuffix = '@OData.Community.Display.V1.FormattedValue'
 
 /**

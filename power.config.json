@@ -35,6 +35,14 @@
         "todo"
       ],
       "dataSets": {}
+    },
+    "1069af40-5ae8-45f4-bec2-cde7a0d117b6": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_planner",
+      "displayName": "Planner",
+      "dataSources": [
+        "planner"
+      ],
+      "dataSets": {}
     }
   },
   "databaseReferences": {

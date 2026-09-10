@@ -1,8 +1,9 @@
 import { getContext } from '@microsoft/power-apps/app'
-import { Leadsstatuscode } from '../generated/models/LeadsModel'
-import { Opportunitiesstatuscode } from '../generated/models/OpportunitiesModel'
+import { Leadsstatuscode, type Leads } from '../generated/models/LeadsModel'
+import { Opportunitiesstatuscode, type Opportunities } from '../generated/models/OpportunitiesModel'
 import type { Page } from '../hooks/usePagedList'
-import { choiceLabel, lookupName } from './Dataverse'
+import { timelineItem, type TimelineItem } from '../lib/chartData'
+import { choiceLabel, crmRecordUrl, lookupName } from './Dataverse'
 import { activitiesTable, leadsTable, opportunitiesTable, systemUsersTable } from './tables'
 
 export type SalesKind = 'lead' | 'opportunity'
@@ -70,11 +71,6 @@ function ownOpenFilter(userId: string) {
   return `statecode eq 0 and _ownerid_value eq ${userId}`
 }
 
-// Direktlink auf den Datensatz im modellgesteuerten CRM.
-function crmRecordUrl(orgUrl: string | undefined, entity: string, id: string): string | undefined {
-  return orgUrl ? `${orgUrl.replace(/\/$/, '')}/main.aspx?pagetype=entityrecord&etn=${entity}&id=${id}` : undefined
-}
-
 // Kein Server-Filter auf activitytypecode: falls der Typ dort als String statt Zahl geführt wird, würde
 // "ne 4202" sonst unbemerkt 0 Treffer liefern - daher lokal aussortieren.
 async function latestActivityDue(regardingId: string): Promise<string | null> {
@@ -106,29 +102,47 @@ function nextCursor(cursor: SalesCursor, skipToken: string | undefined): SalesCu
   return cursor.phase === 'dated' ? { phase: 'undated' } : undefined
 }
 
+const LEAD_FIELDS = ['leadid', 'subject', 'companyname', 'estimatedvalue', 'estimatedclosedate', 'statuscode']
+
+function toLeadRow(lead: Leads, orgUrl: string | undefined, activityDue: string | null): SalesRow {
+  return {
+    id: lead.leadid,
+    kind: 'lead',
+    title: lead.subject || '(ohne Thema)',
+    customer: lead.companyname || '–',
+    status: choiceLabel(Leadsstatuscode, lead.statuscode) || '–',
+    value: lead.estimatedvalue ?? null,
+    closeDate: lead.estimatedclosedate ?? null,
+    activityDue,
+    url: crmRecordUrl(orgUrl, 'lead', lead.leadid),
+  }
+}
+
+function toOpportunityRow(opportunity: Opportunities, orgUrl: string | undefined, activityDue: string | null): SalesRow {
+  return {
+    id: opportunity.opportunityid,
+    kind: 'opportunity',
+    title: opportunity.name || '(ohne Namen)',
+    customer: lookupName(opportunity, 'customerid') || '–',
+    status: choiceLabel(Opportunitiesstatuscode, opportunity.statuscode) || '–',
+    value: opportunity.estimatedvalue ?? null,
+    closeDate: opportunity.estimatedclosedate ?? null,
+    activityDue,
+    url: crmRecordUrl(orgUrl, 'opportunity', opportunity.opportunityid),
+  }
+}
+
 /** Eigene offene Leads, stapelweise. */
 export async function loadLeadsPage(cursor: SalesCursor | undefined): Promise<Page<SalesRow, SalesCursor>> {
   const current = cursor ?? { phase: 'dated' }
   const { userId, orgUrl } = await salesContext()
   const page = await leadsTable.getPage({
     ...phaseQuery(userId, current),
-    select: ['leadid', 'subject', 'companyname', 'estimatedvalue', 'estimatedclosedate', 'statuscode'],
+    select: LEAD_FIELDS,
     maxPageSize: PAGE_SIZE,
     skipToken: current.skipToken,
   })
-  const items = await Promise.all(
-    page.records.map(async (lead) => ({
-      id: lead.leadid,
-      kind: 'lead' as const,
-      title: lead.subject || '(ohne Thema)',
-      customer: lead.companyname || '–',
-      status: choiceLabel(Leadsstatuscode, lead.statuscode) || '–',
-      value: lead.estimatedvalue ?? null,
-      closeDate: lead.estimatedclosedate ?? null,
-      activityDue: await latestActivityDue(lead.leadid),
-      url: crmRecordUrl(orgUrl, 'lead', lead.leadid),
-    })),
-  )
+  const items = await Promise.all(page.records.map(async (lead) => toLeadRow(lead, orgUrl, await latestActivityDue(lead.leadid))))
   return { items, next: nextCursor(current, page.skipToken) }
 }
 
@@ -143,19 +157,41 @@ export async function loadOpportunitiesPage(cursor: SalesCursor | undefined): Pr
     skipToken: current.skipToken,
   })
   const items = await Promise.all(
-    page.records.map(async (opportunity) => ({
-      id: opportunity.opportunityid,
-      kind: 'opportunity' as const,
-      title: opportunity.name || '(ohne Namen)',
-      customer: lookupName(opportunity, 'customerid') || '–',
-      status: choiceLabel(Opportunitiesstatuscode, opportunity.statuscode) || '–',
-      value: opportunity.estimatedvalue ?? null,
-      closeDate: opportunity.estimatedclosedate ?? null,
-      activityDue: await latestActivityDue(opportunity.opportunityid),
-      url: crmRecordUrl(orgUrl, 'opportunity', opportunity.opportunityid),
-    })),
+    page.records.map(async (opportunity) => toOpportunityRow(opportunity, orgUrl, await latestActivityDue(opportunity.opportunityid))),
   )
   return { items, next: nextCursor(current, page.skipToken) }
+}
+
+/** Alle eigenen offenen Leads auf einmal, ohne Aktivitätsabfrage - für die Suche. */
+export async function listOwnOpenLeads(): Promise<SalesRow[]> {
+  const { userId, orgUrl } = await salesContext()
+  const leads = await leadsTable.getAll({ select: LEAD_FIELDS, filter: ownOpenFilter(userId) })
+  return leads.map((lead) => toLeadRow(lead, orgUrl, null))
+}
+
+/** Alle eigenen offenen Verkaufschancen auf einmal, ohne Aktivitätsabfrage - für die Suche. */
+export async function listOwnOpenOpportunities(): Promise<SalesRow[]> {
+  const { userId, orgUrl } = await salesContext()
+  const opportunities = await opportunitiesTable.getAll({ filter: ownOpenFilter(userId) })
+  return opportunities.map((opportunity) => toOpportunityRow(opportunity, orgUrl, null))
+}
+
+/** Eigene Leads und Verkaufschancen mit Anlage- und Abschlusszeitpunkt, soweit sie seit `since` offen waren - für den Auslastungsverlauf. */
+export async function listSalesTimeline(since: Date): Promise<Record<SalesKind, TimelineItem[]>> {
+  const { userId } = await salesContext()
+  // Geschlossene Datensätze nur, wenn sie seit Beginn des Zeitraums geändert - also frühestens dann geschlossen - wurden.
+  const filter = `_ownerid_value eq ${userId} and (statecode eq 0 or modifiedon ge ${since.toISOString()})`
+  const [leads, opportunities] = await Promise.all([
+    leadsTable.getAll({ select: ['leadid', 'createdon', 'modifiedon', 'statecode'], filter }),
+    opportunitiesTable.getAll({ select: ['opportunityid', 'createdon', 'modifiedon', 'actualclosedate', 'statecode'], filter }),
+  ])
+  return {
+    // Leads haben kein Abschlussdatum - bei geschlossenen gilt die letzte Änderung als Abschluss.
+    lead: leads.flatMap((lead) => timelineItem(lead.createdon, Number(lead.statecode) === 0 ? null : lead.modifiedon)),
+    opportunity: opportunities.flatMap((opportunity) =>
+      timelineItem(opportunity.createdon, Number(opportunity.statecode) === 0 ? null : (opportunity.actualclosedate ?? opportunity.modifiedon)),
+    ),
+  }
 }
 
 /** Anzahl und Summe der geschätzten Umsätze aller eigenen offenen Datensätze - unabhängig davon, wie viel angezeigt wird. */

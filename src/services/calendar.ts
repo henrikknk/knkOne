@@ -5,7 +5,6 @@ import type {
   GraphCalendarEventClientReceiveimportance,
   GraphCalendarEventClientReceiveresponseType,
 } from '../generated/models/Office365OutlookModel'
-import type { Page } from '../hooks/usePagedList'
 
 export interface EventCategory {
   name: string
@@ -125,26 +124,31 @@ function toRow(event: GraphCalendarEventClientReceive): CalendarEventRow | null 
   }
 }
 
-const WINDOW_DAYS = 7
-const MAX_WINDOWS = 12
+const PAGE_SIZE = 100
+const MAX_PAGES = 10
 
-/** Anstehende Termine im eigenen Kalender, stapelweise je Woche (bis 12 Wochen voraus). */
-export async function loadUpcomingEventsPage(windowIndex: number | undefined): Promise<Page<CalendarEventRow, number>> {
-  const index = windowIndex ?? 0
+/** Alle Termine im eigenen Kalender, die den Zeitraum [from, to) berühren, nach Beginn sortiert. */
+export async function loadEventsInRange(from: Date, to: Date): Promise<CalendarEventRow[]> {
   const calendarId = await ownCalendarId()
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const from = index === 0 ? now : new Date(today.getFullYear(), today.getMonth(), today.getDate() + index * WINDOW_DAYS)
-  const to = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (index + 1) * WINDOW_DAYS)
-
-  const result = await Office365OutlookService.GetEventsCalendarViewV3(calendarId, from.toISOString(), to.toISOString())
-  if (!result.success) throw new Error(result.error?.message || 'Termine konnten nicht geladen werden')
-
-  const items = (result.data?.value ?? [])
-    .map(toRow)
-    .filter((row): row is CalendarEventRow => row !== null)
-    // Termine, die ins nächste Fenster hineinragen, nur einmal zeigen: im Fenster ihres Beginns.
-    .filter((row) => index === 0 || row.start >= from)
-    .sort((a, b) => a.start.getTime() - b.start.getTime())
-  return { items, next: index + 1 < MAX_WINDOWS ? index + 1 : undefined }
+  const rows = new Map<string, CalendarEventRow>()
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const result = await Office365OutlookService.GetEventsCalendarViewV3(
+      calendarId,
+      from.toISOString(),
+      to.toISOString(),
+      undefined,
+      undefined,
+      PAGE_SIZE,
+      page * PAGE_SIZE,
+    )
+    if (!result.success) throw new Error(result.error?.message || 'Termine konnten nicht geladen werden')
+    const value = result.data?.value ?? []
+    const before = rows.size
+    for (const row of value.map(toRow)) {
+      if (row) rows.set(row.id, row)
+    }
+    // Letzte Seite - oder der Connector ignoriert $skip und liefert nur Bekanntes.
+    if (value.length < PAGE_SIZE || rows.size === before) break
+  }
+  return [...rows.values()].sort((a, b) => a.start.getTime() - b.start.getTime())
 }

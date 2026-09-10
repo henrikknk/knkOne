@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import './App.css'
 import knkLogo from './assets/knk-logo.jpg'
-import type { WidgetDef, WidgetProps } from './components/widgetTypes'
+import GlobalSearch from './components/GlobalSearch'
+import type { WidgetDef, WidgetProps, WidgetSize } from './components/widgetTypes'
 import AktivitaetenWidget from './widgets/AktivitaetenWidget'
+import AuslastungWidget from './widgets/AuslastungWidget'
 import KundensignaleWidget from './widgets/KundensignaleWidget'
 import OfflineWidget from './widgets/OfflineWidget'
 import TermineWidget from './widgets/TermineWidget'
@@ -22,15 +24,17 @@ type CatalogEntry = WidgetDef & { component: (props: WidgetProps) => ReactNode }
 const SOURCES = {
   dynamics: { source: 'Dynamics 365', sourceShort: 'D365', color: '#004576' },
   jira: { source: 'Jira', sourceShort: 'JIRA', color: '#0C66E4' },
-  todo: { source: 'Microsoft To-Do', sourceShort: 'TODO', color: '#2564CF' },
+  todo: { source: 'To-Do & Planner', sourceShort: 'TODO', color: '#2564CF' },
   outlook: { source: 'Outlook', sourceShort: 'OL', color: '#0F6CBD' },
   web: { source: 'Perplexity', sourceShort: 'WEB', color: '#1F7A8C' },
   confluence: { source: 'Confluence', sourceShort: 'CNF', color: '#1868DB' },
   nav: { source: 'NAV / Datasets', sourceShort: 'NAV', color: '#107C10' },
   teams: { source: 'Microsoft Teams', sourceShort: 'TMS', color: '#5B5FC7' },
+  combined: { source: 'Jira · Dynamics 365 · To-Do · Planner', sourceShort: 'ALLE', color: '#004576' },
 } satisfies Record<string, Omit<WidgetDef, 'id' | 'title'>>
 
 const CATALOG: CatalogEntry[] = [
+  { id: 'auslastung', title: 'Auslastung', ...SOURCES.combined, component: AuslastungWidget },
   { id: 'vertragsuebersicht', title: 'Vertragsübersicht', ...SOURCES.dynamics, component: VertragsuebersichtWidget },
   { id: 'vertriebsvorgaenge', title: 'Vertriebsvorgänge', ...SOURCES.dynamics, component: VertriebsvorgaengeWidget },
   { id: 'tickets', title: 'Tickets', ...SOURCES.jira, component: TicketsWidget },
@@ -46,16 +50,16 @@ const CATALOG: CatalogEntry[] = [
 
 const ROLES: RoleDef[] = [
   {
+    id: 'bestandskunden',
+    name: 'Bestandskundenvertrieb',
+    desc: 'Vertragslage, Umsätze und offene Vorgänge bestehender Kunden',
+    widgets: ['aktivitaeten', 'tickets', 'kommunikation', 'kundensignale', 'vertriebsvorgaenge', 'vertragsuebersicht'],
+  },
+  {
     id: 'neukunden',
     name: 'Neukundenvertrieb',
     desc: 'Leads, Signale und Aktivitäten für die Neukundengewinnung',
     widgets: ['vertragsuebersicht', 'vertriebsvorgaenge', 'kundensignale', 'aktivitaeten', 'kommunikation'],
-  },
-  {
-    id: 'bestandskunden',
-    name: 'Bestandskundenvertrieb',
-    desc: 'Vertragslage, Umsätze und offene Vorgänge bestehender Kunden',
-    widgets: ['vertragsuebersicht', 'kundenhistorie', 'umsaetze', 'tickets', 'confluence', 'kundensignale', 'kommunikation'],
   },
   {
     id: 'projektleitung',
@@ -71,20 +75,25 @@ const ROLES: RoleDef[] = [
   },
 ]
 
-const STORAGE_KEY = 'knkone.dashboard.config.v1'
+// v2: neue Standard-Anordnung - ältere, lokal gespeicherte Anordnungen würden sie sonst überdecken.
+const STORAGE_KEY = 'knkone.dashboard.config.v2'
+const SIZES_STORAGE_KEY = 'knkone.dashboard.sizes.v1'
 
-function loadConfig(): Record<string, string[]> {
+/** Widget-Größen je Rolle und Widget; fehlende Einträge belegen 1 × 1 */
+type SizeConfig = Record<string, Record<string, WidgetSize>>
+
+function loadStored<T extends object>(key: string): T {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : {}
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : ({} as T)
   } catch {
-    return {}
+    return {} as T
   }
 }
 
-function saveConfig(cfg: Record<string, string[]>) {
+function saveStored(key: string, value: object) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg))
+    localStorage.setItem(key, JSON.stringify(value))
   } catch {
     // ignore storage errors (e.g. private browsing quota)
   }
@@ -98,18 +107,51 @@ function PlusIcon() {
   )
 }
 
+function PencilIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z" />
+      <path d="m13.5 6.5 4 4" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  )
+}
+
 function App() {
   const [roleId, setRoleId] = useState(ROLES[0].id)
   const [editing, setEditing] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [config, setConfig] = useState<Record<string, string[]>>(loadConfig)
+  const [config, setConfig] = useState<Record<string, string[]>>(() => loadStored(STORAGE_KEY))
+  const [sizes, setSizes] = useState<SizeConfig>(() => loadStored(SIZES_STORAGE_KEY))
   const [toast, setToast] = useState<{ message: string } | null>(null)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const dragSource = useRef<string | null>(null)
+  const editButton = useRef<HTMLButtonElement>(null)
+  const doneButton = useRef<HTMLButtonElement>(null)
+  const focusAfterToggle = useRef(false)
 
   useEffect(() => {
-    saveConfig(config)
+    saveStored(STORAGE_KEY, config)
   }, [config])
+
+  // Der geklickte Knopf verschwindet beim Umschalten - Tastaturfokus auf sein Gegenstück setzen.
+  useEffect(() => {
+    if (!focusAfterToggle.current) return
+    focusAfterToggle.current = false
+    const target = editing ? doneButton.current : editButton.current
+    target?.focus()
+  }, [editing])
+
+  useEffect(() => {
+    saveStored(SIZES_STORAGE_KEY, sizes)
+  }, [sizes])
 
   useEffect(() => {
     if (!toast) return
@@ -136,6 +178,15 @@ function App() {
     setConfig((prev) => ({ ...prev, [roleId]: list }))
   }
 
+  function sizeOf(id: string): WidgetSize {
+    const stored = sizes[roleId]?.[id]
+    return { cols: stored?.cols === 2 ? 2 : 1, rows: stored?.rows === 2 ? 2 : 1 }
+  }
+
+  function resizeWidget(id: string, size: WidgetSize) {
+    setSizes((prev) => ({ ...prev, [roleId]: { ...prev[roleId], [id]: size } }))
+  }
+
   function showToast(message: string) {
     // Neues Objekt, damit auch dieselbe Meldung zweimal hintereinander den Timer neu startet.
     setToast({ message })
@@ -143,12 +194,18 @@ function App() {
 
   function toggleEditing() {
     const next = !editing
+    focusAfterToggle.current = true
     setEditing(next)
-    showToast(next ? 'Bearbeiten: Widgets ziehen, entfernen oder hinzufügen' : 'Dashboard gespeichert')
+    showToast(next ? 'Bearbeiten: Widgets verschieben, an der Ecke vergrößern, entfernen oder hinzufügen' : 'Dashboard gespeichert')
   }
 
   function removeWidget(id: string) {
     updateWidgets(widgetIds.filter((x) => x !== id))
+    setSizes((prev) => {
+      const roleSizes = { ...prev[roleId] }
+      delete roleSizes[id]
+      return { ...prev, [roleId]: roleSizes }
+    })
     const entry = CATALOG.find((c) => c.id === id)
     if (entry) showToast(`${entry.title} entfernt`)
   }
@@ -204,18 +261,29 @@ function App() {
       <main className="main">
         <header className="page-head">
           <div className="page-titles">
-            <p className="eyebrow">Dashboard</p>
+            <p className="eyebrow">{editing ? 'Dashboard bearbeiten' : 'Dashboard'}</p>
             <h1>{role.name}</h1>
             <p className="page-desc">{role.desc}</p>
           </div>
           <div className="page-actions">
-            <button className={`btn btn--secondary${editing ? ' is-active' : ''}`} type="button" aria-pressed={editing} onClick={toggleEditing}>
-              {editing ? 'Fertig' : 'Bearbeiten'}
-            </button>
-            <button className="btn btn--primary" type="button" onClick={() => setPickerOpen(true)}>
-              <PlusIcon />
-              Widget hinzufügen
-            </button>
+            <GlobalSearch widgets={CATALOG} />
+            {editing ? (
+              <div className="btn-group" role="group" aria-label="Dashboard bearbeiten">
+                <button className="btn btn--secondary" type="button" onClick={() => setPickerOpen(true)}>
+                  <PlusIcon />
+                  Widget hinzufügen
+                </button>
+                <button ref={doneButton} className="btn btn--primary" type="button" onClick={toggleEditing}>
+                  <CheckIcon />
+                  Fertig
+                </button>
+              </div>
+            ) : (
+              <button ref={editButton} className="btn btn--secondary" type="button" onClick={toggleEditing}>
+                <PencilIcon />
+                Bearbeiten
+              </button>
+            )}
           </div>
         </header>
 
@@ -230,6 +298,8 @@ function App() {
                 widget={entry}
                 editing={editing}
                 dragging={draggingId === entry.id}
+                size={sizeOf(entry.id)}
+                onResize={(size) => resizeWidget(entry.id, size)}
                 onRemove={() => removeWidget(entry.id)}
                 onDragStart={() => {
                   dragSource.current = entry.id

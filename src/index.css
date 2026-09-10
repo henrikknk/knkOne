@@ -24,12 +24,25 @@
   --info: var(--brand);
   --info-soft: var(--brand-soft);
 
+  /* Diagrammserien in fester Reihenfolge, je Datenart immer dieselbe Farbe:
+     1 Tickets · 2 Verkaufschancen · 3 Leads · 4 Aufgaben · 5 Mir zugewiesen. Mit dem dataviz-Validator gegen die
+     Widget-Fläche geprüft; 3, 4 und 5 liegen unter 3:1 Kontrast - daher Legende, Endbeschriftungen und Tabellenansicht. */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+
   --sidebar-bg: var(--brand);
   --sidebar-bg-strong: var(--brand-strong);
   --sidebar-text: rgba(255, 255, 255, 0.78);
   --sidebar-text-strong: #ffffff;
   --sidebar-hover: rgba(255, 255, 255, 0.1);
   --sidebar-active: rgba(255, 255, 255, 0.18);
+
+  /* Dashboard-Hintergrund: Grundfarbe, nach unten mit Weiß aufgehellt */
+  --dashboard-bg-start: #004576;
+  --dashboard-bg-end: color-mix(in srgb, #004576 50%, #ffffff);
 
   --radius-sm: 6px;
   --radius: 10px;
@@ -69,8 +82,15 @@
     --warning-soft: #37290f;
     --success: #6fcf8f;
     --success-soft: #15301f;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
     --sidebar-bg: #0a2a42;
     --sidebar-bg-strong: #061b2b;
+    --dashboard-bg-start: #0a2a42;
+    --dashboard-bg-end: #2a5577;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px -14px rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }

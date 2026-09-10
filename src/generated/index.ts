@@ -14,6 +14,7 @@ export * as LeadsModel from './models/LeadsModel';
 export * as MicrosoftTo_Do_Business_Model from './models/MicrosoftTo_Do_Business_Model';
 export * as Office365OutlookModel from './models/Office365OutlookModel';
 export * as OpportunitiesModel from './models/OpportunitiesModel';
+export * as PlannerModel from './models/PlannerModel';
 export * as SystemusersModel from './models/SystemusersModel';
 
 // Services
@@ -26,4 +27,5 @@ export * from './services/LeadsService';
 export * from './services/MicrosoftTo_Do_Business_Service';
 export * from './services/Office365OutlookService';
 export * from './services/OpportunitiesService';
+export * from './services/PlannerService';
 export * from './services/SystemusersService';

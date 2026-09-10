@@ -1,5 +1,6 @@
 import { MicrosoftTo_Do_Business_Service as ToDoService } from '../generated/services/MicrosoftTo_Do_Business_Service'
 import type { ToDo_V2, ToDo_V2importance, ToDo_V2status } from '../generated/models/MicrosoftTo_Do_Business_Model'
+import { timelineItem, type TimelineItem } from '../lib/chartData'
 import { runConnector } from './Connector'
 
 // ListToDosByFolderV2 liefert ohne $top nur 10 Aufgaben je Liste und kann nicht nach Status filtern.
@@ -24,6 +25,8 @@ export interface TodoRow {
   /** Fälligkeit als YYYY-MM-DD ohne Uhrzeit, null wenn keine gesetzt ist. */
   dueDate: string | null
   modified: string | null
+  created: string | null
+  completed: string | null
 }
 
 function toRow(task: ToDo_V2, list: string): TodoRow {
@@ -37,6 +40,8 @@ function toRow(task: ToDo_V2, list: string): TodoRow {
     importance: task.importance ?? 'normal',
     dueDate: task.dueDateTime?.dateTime?.slice(0, 10) || null,
     modified: task.lastModifiedDateTime ?? null,
+    created: task.createdDateTime ?? null,
+    completed: task.completedDateTime?.dateTime ?? null,
   }
 }
 
@@ -48,12 +53,15 @@ function compareTodos(a: TodoRow, b: TodoRow) {
   return (b.modified ?? '').localeCompare(a.modified ?? '')
 }
 
-/** Offene Aufgaben aus allen To-Do-Listen des angemeldeten Benutzers. */
-export async function listMyOpenTodos(): Promise<TodoRow[]> {
+/** Alle Aufgaben - auch erledigte - aus den eigenen To-Do-Listen des angemeldeten Benutzers. */
+async function listAllOwnTodos(): Promise<TodoRow[]> {
   const lists = await runConnector('To-Do: GetAllTodoListsV2', () => ToDoService.GetAllTodoListsV2())
   // Listen, die andere Personen freigegeben haben, enthalten deren Aufgaben - nur eigene Listen anzeigen.
+  // Die Liste „Gekennzeichnete E-Mails“ enthält keine echten Aufgaben und bleibt ebenfalls außen vor.
   const folders = (lists ?? []).flatMap((list) =>
-    list.id && list.isOwner !== false ? [{ id: list.id, name: list.displayName || 'Aufgaben' }] : [],
+    list.id && list.isOwner !== false && list.wellknownListName !== 'flaggedEmails'
+      ? [{ id: list.id, name: list.displayName || 'Aufgaben' }]
+      : [],
   )
 
   // allSettled: eine nicht lesbare (z. B. geteilte) Liste soll die übrigen nicht verstecken.
@@ -74,6 +82,15 @@ export async function listMyOpenTodos(): Promise<TodoRow[]> {
   }
   if (failures.length > 0 && failures.length === results.length) throw failures[0]
   if (failures.length > 0) console.error('To-Do: einzelne Listen konnten nicht geladen werden', failures)
+  return rows
+}
 
-  return rows.filter((row) => row.status !== 'completed').sort(compareTodos)
+/** Offene Aufgaben aus allen To-Do-Listen des angemeldeten Benutzers. */
+export async function listMyOpenTodos(): Promise<TodoRow[]> {
+  return (await listAllOwnTodos()).filter((row) => row.status !== 'completed').sort(compareTodos)
+}
+
+/** Anlage- und Erledigungszeitpunkte aller eigenen Aufgaben - für den Auslastungsverlauf. */
+export async function listMyTodoTimeline(): Promise<TimelineItem[]> {
+  return (await listAllOwnTodos()).flatMap((row) => timelineItem(row.created, row.status === 'completed' ? (row.completed ?? row.modified) : null))
 }

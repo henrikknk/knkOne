@@ -1,6 +1,7 @@
 import { JiraService } from '../generated/services/JiraService'
 import type { FullIssue } from '../generated/models/JiraModel'
 import type { Page } from '../hooks/usePagedList'
+import { timelineItem, type TimelineItem } from '../lib/chartData'
 import { runConnector } from './Connector'
 
 // Die Jira-Connection nutzt API-Token-Authentifizierung - jeder Benutzer mit eigener Connection (E-Mail + Token),
@@ -10,10 +11,11 @@ import { runConnector } from './Connector'
 export const jiraInstanceUrl = 'https://knkcesupport.atlassian.net'
 
 // Offene Tickets, bei denen ich zugewiesen oder Anfrageteilnehmer bin.
-const participantsJql =
-  '(assignee = currentUser() OR "Request participants" = currentUser()) AND statusCategory != Done ORDER BY updated DESC'
+const participantsScope = '(assignee = currentUser() OR "Request participants" = currentUser())'
 // „Request participants“ gibt es nur in Jira Service Management - ohne das Feld nur nach Zuweisung suchen.
-const assigneeOnlyJql = 'assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC'
+const assigneeScope = 'assignee = currentUser()'
+const participantsJql = `${participantsScope} AND statusCategory != Done ORDER BY updated DESC`
+const assigneeOnlyJql = `${assigneeScope} AND statusCategory != Done ORDER BY updated DESC`
 
 // fields steht im Connector sonst auf *all - nur anfordern, was die Oberfläche anzeigt.
 const issueFields = 'summary,status,assignee,priority,duedate,updated,issuetype,project'
@@ -89,8 +91,8 @@ function toRow(issue: FullIssue, accountId: string | null): JiraIssueRow {
   }
 }
 
-function fetchIssues(jql: string, token?: string) {
-  return runConnector('Jira: ListIssues', () => JiraService.ListIssues(jiraInstanceUrl, jql, undefined, issueFields, token))
+function fetchIssues(jql: string, token?: string, fields = issueFields) {
+  return runConnector('Jira: ListIssues', () => JiraService.ListIssues(jiraInstanceUrl, jql, undefined, fields, token))
 }
 
 /** Offene Tickets, bei denen ich zugewiesen oder Anfrageteilnehmer bin - stapelweise über nextPageToken. */
@@ -110,4 +112,53 @@ export async function loadMyIssuesPage(cursor: JiraCursor | undefined): Promise<
   const items = (response?.issues ?? []).map((issue) => toRow(issue, accountId))
   const token = response?.nextPageToken && response.isLast !== true ? response.nextPageToken : undefined
   return { items, next: token ? { jql, token } : undefined }
+}
+
+/** Alle offenen Tickets aus bis zu `maxPages` Seiten - für Suche und Diagramm. */
+export async function listAllMyIssues(maxPages = 10): Promise<JiraIssueRow[]> {
+  const issues: JiraIssueRow[] = []
+  let cursor: JiraCursor | undefined
+  for (let page = 0; page < maxPages; page++) {
+    const result = await loadMyIssuesPage(cursor)
+    issues.push(...result.items)
+    cursor = result.next
+    if (!cursor) break
+  }
+  return issues
+}
+
+const timelineFields = 'created,resolutiondate,updated,status,statuscategorychangedate'
+const MAX_TIMELINE_PAGES = 20
+
+// Offene Tickets plus alle, die seit `since` erledigt wurden - ältere erledigte zählen im Zeitraum nicht mehr.
+function timelineJql(scope: string, since: Date) {
+  const days = Math.max(1, Math.ceil((Date.now() - since.getTime()) / 86_400_000))
+  return `${scope} AND (statusCategory != Done OR statusCategoryChangedDate >= -${days}d)`
+}
+
+/** Eigene Tickets mit Anlage- und Erledigungszeitpunkt, soweit sie seit `since` offen waren - für den Auslastungsverlauf. */
+export async function listMyIssueTimeline(since: Date): Promise<TimelineItem[]> {
+  const items: TimelineItem[] = []
+  let jql = timelineJql(participantsScope, since)
+  let token: string | undefined
+  for (let page = 0; page < MAX_TIMELINE_PAGES; page++) {
+    let response
+    try {
+      response = await fetchIssues(jql, token, timelineFields)
+    } catch (error) {
+      if (page > 0) throw error
+      jql = timelineJql(assigneeScope, since)
+      response = await fetchIssues(jql, undefined, timelineFields)
+    }
+    for (const issue of response?.issues ?? []) {
+      const fields = issue.fields ?? {}
+      const done = fields.status?.statusCategory?.key === 'done'
+      // Nicht jeder Workflow setzt eine Lösung - dann gilt der Wechsel in die Kategorie „Erledigt“.
+      const categoryChanged = (fields as { statuscategorychangedate?: string }).statuscategorychangedate
+      items.push(...timelineItem(fields.created, done ? (fields.resolutiondate ?? categoryChanged ?? fields.updated) : null))
+    }
+    token = response?.nextPageToken && response.isLast !== true ? response.nextPageToken : undefined
+    if (!token) break
+  }
+  return items
 }

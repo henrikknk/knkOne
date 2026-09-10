@@ -1,24 +1,120 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import type { PagedList } from '../hooks/usePagedList'
 import type { Urgency } from '../lib/format'
-import type { Tone, WidgetProps } from './widgetTypes'
+import type { Tone, WidgetProps, WidgetSize, WidgetSpan } from './widgetTypes'
 
 interface WidgetFrameProps extends WidgetProps {
   /** Kennzahl rechts im Kopf, z. B. Anzahl kritischer Einträge oder Gesamtbetrag */
   badge?: ReactNode
+  /** Kleine Schaltflächen im Kopf, z. B. der Umschalter auf die Diagrammansicht */
+  actions?: ReactNode
   /** Leiste unter dem Kopf, z. B. Umschalter */
   toolbar?: ReactNode
+  /** Zusätzliche Klasse für den Inhaltsbereich, z. B. ohne Innenabstand */
+  bodyClassName?: string
   children: ReactNode
 }
 
-export function WidgetFrame({ widget, editing, dragging, onRemove, onDragStart, onDragEnd, onDrop, badge, toolbar, children }: WidgetFrameProps) {
+interface ResizeStart {
+  x: number
+  y: number
+  size: WidgetSize
+  /** Breite einer Spalte bzw. Höhe einer Zeile, jeweils inklusive Abstand */
+  colStep: number
+  rowStep: number
+  gridCols: number
+}
+
+function toSpan(value: number): WidgetSpan {
+  return value >= 2 ? 2 : 1
+}
+
+function gridColumnCount(grid: Element) {
+  return getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length
+}
+
+export function WidgetFrame({
+  widget,
+  editing,
+  dragging,
+  size,
+  onResize,
+  onRemove,
+  onDragStart,
+  onDragEnd,
+  onDrop,
+  badge,
+  actions,
+  toolbar,
+  bodyClassName,
+  children,
+}: WidgetFrameProps) {
   const titleId = `widget-${widget.id}-title`
+  const resizeStart = useRef<ResizeStart | null>(null)
+  const [resizing, setResizing] = useState(false)
+
+  function beginResize(event: PointerEvent<HTMLButtonElement>) {
+    const section = event.currentTarget.closest('.widget')
+    const grid = section?.parentElement
+    if (!section || !grid) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    const style = getComputedStyle(grid)
+    const rect = section.getBoundingClientRect()
+    resizeStart.current = {
+      x: event.clientX,
+      y: event.clientY,
+      size,
+      colStep: (rect.width + (parseFloat(style.columnGap) || 0)) / size.cols,
+      rowStep: (rect.height + (parseFloat(style.rowGap) || 0)) / size.rows,
+      gridCols: gridColumnCount(grid),
+    }
+    setResizing(true)
+  }
+
+  function moveResize(event: PointerEvent<HTMLButtonElement>) {
+    const start = resizeStart.current
+    if (!start) return
+    // Rastet um, sobald der Zeiger mehr als eine halbe Spalte bzw. Zeile weitergezogen wurde.
+    // Bei nur einer Rasterspalte bleibt die gespeicherte Breite für breitere Bildschirme erhalten.
+    const cols = start.gridCols < 2 ? start.size.cols : toSpan(Math.round(start.size.cols + (event.clientX - start.x) / start.colStep))
+    const rows = toSpan(Math.round(start.size.rows + (event.clientY - start.y) / start.rowStep))
+    if (cols !== size.cols || rows !== size.rows) onResize({ cols, rows })
+  }
+
+  function endResize() {
+    resizeStart.current = null
+    setResizing(false)
+  }
+
+  function resizeWithKeys(event: KeyboardEvent<HTMLButtonElement>) {
+    const grid = event.currentTarget.closest('.widget')?.parentElement
+    const next: WidgetSize = { ...size }
+    if (event.key === 'ArrowRight') {
+      if (grid && gridColumnCount(grid) >= 2) next.cols = 2
+    } else if (event.key === 'ArrowLeft') next.cols = 1
+    else if (event.key === 'ArrowDown') next.rows = 2
+    else if (event.key === 'ArrowUp') next.rows = 1
+    else return
+    event.preventDefault()
+    if (next.cols !== size.cols || next.rows !== size.rows) onResize(next)
+  }
+
+  const isResizing = editing && resizing
+
   return (
     <section
-      className={`widget${editing ? ' is-editing' : ''}${dragging ? ' is-dragging' : ''}`}
+      className={`widget widget--w${size.cols} widget--h${size.rows}${editing ? ' is-editing' : ''}${dragging ? ' is-dragging' : ''}${isResizing ? ' is-resizing' : ''}`}
       aria-labelledby={titleId}
-      draggable={editing}
-      onDragStart={onDragStart}
+      draggable={editing && !isResizing}
+      onDragStart={(event) => {
+        // Beim Größenziehen nicht gleichzeitig das Verschieben starten.
+        if (resizeStart.current) {
+          event.preventDefault()
+          return
+        }
+        onDragStart()
+      }}
       onDragEnd={onDragEnd}
       onDragOver={(event) => {
         if (editing) event.preventDefault()
@@ -51,6 +147,7 @@ export function WidgetFrame({ widget, editing, dragging, onRemove, onDragStart, 
           </h2>
           <span className="widget-subtitle">{widget.source}</span>
         </div>
+        {actions && <div className="widget-actions">{actions}</div>}
         {badge && <div className="widget-badge">{badge}</div>}
         {editing && (
           <button className="widget-remove" type="button" aria-label={`${widget.title} entfernen`} onClick={onRemove}>
@@ -61,8 +158,67 @@ export function WidgetFrame({ widget, editing, dragging, onRemove, onDragStart, 
         )}
       </header>
       {toolbar && <div className="widget-toolbar">{toolbar}</div>}
-      <div className="widget-body">{children}</div>
+      <div className={`widget-body${bodyClassName ? ` ${bodyClassName}` : ''}`}>{children}</div>
+      {editing && (
+        <button
+          type="button"
+          className="widget-resize"
+          title="Ziehen, um die Größe zu ändern"
+          aria-label={`${widget.title}: Größe ändern mit Pfeiltasten, aktuell ${size.cols} × ${size.rows}`}
+          onPointerDown={beginResize}
+          onPointerMove={moveResize}
+          onPointerUp={endResize}
+          onPointerCancel={endResize}
+          onKeyDown={resizeWithKeys}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+            <path d="M11 4 4 11M11 8 8 11" />
+          </svg>
+        </button>
+      )}
     </section>
+  )
+}
+
+/** Schaltet ein Widget zwischen Liste und Diagramm um. */
+export function ChartToggle({ active, onToggle }: { active: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" className="widget-action" aria-pressed={active} aria-label="Diagramm anzeigen" title={active ? 'Zurück zur Liste' : 'Als Diagramm anzeigen'} onClick={onToggle}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+        <path d="M4 20h16" />
+        <path d="M7 16v-5M12 16V6M17 16v-8" />
+      </svg>
+    </button>
+  )
+}
+
+/** Kompakter Umschalter zwischen wenigen Optionen, z. B. Zeitraum oder Gruppierung. */
+export function TabSwitch<T extends string | number>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string
+  options: Array<{ value: T; label: string }>
+  value: T
+  onChange: (value: T) => void
+}) {
+  return (
+    <div className="tabs tabs--compact" role="tablist" aria-label={label}>
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          role="tab"
+          aria-selected={option.value === value}
+          className={`tab${option.value === value ? ' is-active' : ''}`}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
   )
 }
 

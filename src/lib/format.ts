@@ -5,6 +5,14 @@ export function formatCurrency(value: number | null | undefined): string {
   return value.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 }
 
+/** Kurzform für Diagrammachsen: 950 €, 12,5 T€, 1,2 Mio. € */
+export function formatCompactCurrency(value: number): string {
+  const format = (amount: number) => amount.toLocaleString('de-DE', { maximumFractionDigits: 1 })
+  if (Math.abs(value) >= 1_000_000) return `${format(value / 1_000_000)} Mio. €`
+  if (Math.abs(value) >= 1_000) return `${format(value / 1_000)} T€`
+  return `${format(value)} €`
+}
+
 /** Lokales Kalenderdatum (Mitternacht) - für Fristen und Fälligkeiten zählt nur der Tag. */
 export function toCalendarDate(value: Date | string | null | undefined): Date | null {
   if (!value) return null
