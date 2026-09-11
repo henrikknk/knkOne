@@ -34,6 +34,9 @@ function normalize(value: string): string {
   return value.toLocaleLowerCase('de-DE').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 }
 
+/** Dieselbe Normalisierung für andere Suchen, z. B. im Confluence-Widget. */
+export const normalizeSearchText = normalize
+
 function toRecord(id: string, title: string, meta: Array<string | null | undefined>, href?: string, extra: Array<string | null | undefined> = []): SearchRecord {
   const metaText = meta.filter(Boolean).join(' · ')
   return { id, title, meta: metaText, href: href || undefined, titleText: normalize(title), text: normalize([title, metaText, ...extra].filter(Boolean).join(' ')) }

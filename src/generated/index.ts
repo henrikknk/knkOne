@@ -6,6 +6,7 @@
 // Models
 export * as ActivitypointersModel from './models/ActivitypointersModel';
 export * as CommonModels from './models/CommonModels';
+export * as ConfluenceModel from './models/ConfluenceModel';
 export * as JiraModel from './models/JiraModel';
 export * as Knk_contracttypesModel from './models/Knk_contracttypesModel';
 export * as Knk_subscriptionsModel from './models/Knk_subscriptionsModel';
@@ -19,6 +20,7 @@ export * as SystemusersModel from './models/SystemusersModel';
 
 // Services
 export * from './services/ActivitypointersService';
+export * from './services/ConfluenceService';
 export * from './services/JiraService';
 export * from './services/Knk_contracttypesService';
 export * from './services/Knk_subscriptionsService';

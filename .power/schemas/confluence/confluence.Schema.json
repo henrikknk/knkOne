@@ -1,0 +1,541 @@
+{
+  "name": "shared_confluence",
+  "id": "/providers/Microsoft.PowerApps/apis/shared_confluence",
+  "type": "Microsoft.PowerApps/apis",
+  "properties": {
+    "displayName": "Confluence",
+    "iconUri": "https://static.powerapps.com/resource/ppcr/releases/v1.0.1819/1.0.1819.4795/confluence/icon.png",
+    "iconBrandColor": "#FFFFFF",
+    "apiEnvironment": "Shared",
+    "isCustomApi": false,
+    "blobUrisAreProxied": false,
+    "connectionParameterSets": {
+      "uiDefinition": {
+        "displayName": "Authentication type",
+        "description": "Type of authentication to be used"
+      },
+      "values": [
+        {
+          "name": "OAuth",
+          "uiDefinition": {
+            "displayName": "Log in with your Confluence account",
+            "description": "Log in with your Confluence account"
+          },
+          "parameters": {
+            "token": {
+              "type": "oauthSetting",
+              "oAuthSettings": {
+                "identityProvider": "oauth2generic",
+                "clientId": "1dx0BXJPDmhCL97liaWzsp0bQcS5zRPE",
+                "scopes": [
+                  "offline_access",
+                  "read:me",
+                  "read:account",
+                  "read:confluence-space.summary",
+                  "read:confluence-props",
+                  "read:confluence-content.all",
+                  "read:confluence-content.summary",
+                  "search:confluence",
+                  "read:confluence-content.permission",
+                  "read:confluence-user",
+                  "readonly:content.attachment:confluence",
+                  "read:space:confluence",
+                  "read:space-details:confluence",
+                  "read:space.permission:confluence",
+                  "read:space.setting:confluence",
+                  "read:page:confluence",
+                  "read:content:confluence",
+                  "read:content-details:confluence",
+                  "read:attachment:confluence",
+                  "read:blogpost:confluence",
+                  "read:custom-content:confluence"
+                ],
+                "redirectMode": "GlobalPerConnector",
+                "redirectUrl": "https://global.consent.azure-apim.net/redirect/confluence",
+                "properties": {
+                  "IsFirstParty": "False",
+                  "IsOnbehalfofLoginSupported": false
+                },
+                "customParameters": {
+                  "AuthorizationUrlTemplate": {
+                    "value": "https://auth.atlassian.com/authorize"
+                  },
+                  "AuthorizationUrlQueryStringTemplate": {
+                    "value": "?audience=api.atlassian.com&client_id={clientId}&scope={scopes}&redirect_uri={redirectUrl}&state={State}&response_type=code&prompt=consent"
+                  },
+                  "TokenUrlTemplate": {
+                    "value": "https://auth.atlassian.com/oauth/token"
+                  },
+                  "RefreshUrlTemplate": {
+                    "value": "https://auth.atlassian.com/oauth/token"
+                  }
+                }
+              },
+              "uiDefinition": {
+                "displayName": "Log in with your Confluence account credentials",
+                "description": "Log in with your Confluence account Credentials",
+                "tooltip": "Login in via oauth2 using your Confluence account",
+                "constraints": {
+                  "required": "true"
+                }
+              }
+            }
+          },
+          "metadata": {
+            "allowSharing": true
+          }
+        }
+      ]
+    },
+    "connectionParameters": {
+      "DummyValue": {
+        "type": "string",
+        "uiDefinition": {
+          "displayName": "This is a a dummy placeholder needed for MCS UI widget bug. Any auth changes should be made in connectionParameterSets",
+          "description": "This is a a dummy placeholder needed for MCS UI widget bug. Any auth changes should be made in connectionParameterSets",
+          "constraints": {
+            "required": "false"
+          }
+        }
+      }
+    },
+    "swagger": {
+      "swagger": "2.0",
+      "info": {
+        "version": "1.0.0",
+        "title": "Confluence",
+        "description": "Confluence is your connected workspace, designed for collaboration and built to last",
+        "x-ms-api-annotation": {
+          "status": "Production"
+        },
+        "contact": {
+          "name": "Microsoft",
+          "url": "https://support.microsoft.com"
+        }
+      },
+      "host": "4ce29894-044d-e3ec-9ae5-cc6cd8ff0544.10.common.europe002.azure-apihub.net",
+      "basePath": "/apim/confluence",
+      "schemes": [
+        "https"
+      ],
+      "consumes": [],
+      "produces": [
+        "application/json"
+      ],
+      "paths": {
+        "/{connectionId}/ex/confluence/{cloudId}/wiki/api/v2/spaces": {
+          "get": {
+            "summary": "Get spaces",
+            "description": "Returns all spaces on user's website",
+            "operationId": "GetSpaces",
+            "parameters": [
+              {
+                "name": "connectionId",
+                "in": "path",
+                "required": true,
+                "x-ms-visibility": "internal",
+                "type": "string"
+              },
+              {
+                "name": "cloudId",
+                "in": "path",
+                "description": "Choose a website",
+                "required": true,
+                "x-ms-summary": "Confluence Website",
+                "x-ms-dynamic-values": {
+                  "operationId": "GetAccessibleResources",
+                  "value-path": "id",
+                  "value-title": "name"
+                },
+                "type": "string"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "OK",
+                "schema": {
+                  "$ref": "#/definitions/GetSpacesResponse"
+                }
+              }
+            },
+            "deprecated": false,
+            "x-ms-api-annotation": {
+              "status": "Production"
+            },
+            "x-ms-pageable": {
+              "nextLinkName": "@odata.nextLink"
+            },
+            "externalDocs": {
+              "url": "https://docs.microsoft.com/connectors/confluence/#get-spaces"
+            }
+          }
+        },
+        "/{connectionId}/ex/confluence/{cloudId}/wiki/api/v2/pages": {
+          "get": {
+            "summary": "Get pages",
+            "description": "Returns all pages on user's website",
+            "operationId": "GetPages",
+            "parameters": [
+              {
+                "name": "connectionId",
+                "in": "path",
+                "required": true,
+                "x-ms-visibility": "internal",
+                "type": "string"
+              },
+              {
+                "name": "cloudId",
+                "in": "path",
+                "description": "Choose a website",
+                "required": true,
+                "x-ms-summary": "Confluence Website",
+                "x-ms-dynamic-values": {
+                  "operationId": "GetAccessibleResources",
+                  "value-path": "id",
+                  "value-title": "name"
+                },
+                "type": "string"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "OK",
+                "schema": {
+                  "$ref": "#/definitions/GetPagesResponse"
+                }
+              }
+            },
+            "deprecated": false,
+            "x-ms-api-annotation": {
+              "status": "Production"
+            },
+            "x-ms-pageable": {
+              "nextLinkName": "@odata.nextLink"
+            },
+            "externalDocs": {
+              "url": "https://docs.microsoft.com/connectors/confluence/#get-pages"
+            }
+          }
+        },
+        "/{connectionId}/ex/confluence/{cloudId}/wiki/api/v2/spaces/{spaceId}/pages": {
+          "get": {
+            "summary": "Get pages within a space",
+            "description": "Returns all pages under the specified space",
+            "operationId": "GetPagesBySpace",
+            "parameters": [
+              {
+                "name": "connectionId",
+                "in": "path",
+                "required": true,
+                "x-ms-visibility": "internal",
+                "type": "string"
+              },
+              {
+                "name": "cloudId",
+                "in": "path",
+                "description": "Choose a website",
+                "required": true,
+                "x-ms-summary": "Confluence Website",
+                "x-ms-dynamic-values": {
+                  "operationId": "GetAccessibleResources",
+                  "value-path": "id",
+                  "value-title": "name"
+                },
+                "type": "string"
+              },
+              {
+                "name": "spaceId",
+                "in": "path",
+                "description": "Choose a space",
+                "required": true,
+                "x-ms-summary": "Confluence Space",
+                "x-ms-dynamic-values": {
+                  "operationId": "GetSpaces",
+                  "parameters": {
+                    "cloudId": {
+                      "parameter": "cloudId"
+                    }
+                  },
+                  "value-collection": "value",
+                  "value-path": "id",
+                  "value-title": "name"
+                },
+                "type": "string"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "OK",
+                "schema": {
+                  "$ref": "#/definitions/GetPagesResponse"
+                }
+              }
+            },
+            "deprecated": false,
+            "x-ms-api-annotation": {
+              "status": "Production"
+            },
+            "x-ms-pageable": {
+              "nextLinkName": "@odata.nextLink"
+            },
+            "externalDocs": {
+              "url": "https://docs.microsoft.com/connectors/confluence/#get-pages-within-a-space"
+            }
+          }
+        },
+        "/{connectionId}/ex/confluence/{cloudId}/wiki/api/v2/pages/{pageId}/{spaceId}": {
+          "get": {
+            "summary": "Get page content and metadata",
+            "description": "Returns page content and relevant metadata",
+            "operationId": "GetPageMetadata",
+            "parameters": [
+              {
+                "name": "connectionId",
+                "in": "path",
+                "required": true,
+                "x-ms-visibility": "internal",
+                "type": "string"
+              },
+              {
+                "name": "cloudId",
+                "in": "path",
+                "description": "Choose a website",
+                "required": true,
+                "x-ms-summary": "Confluence Website",
+                "x-ms-dynamic-values": {
+                  "operationId": "GetAccessibleResources",
+                  "value-path": "id",
+                  "value-title": "name"
+                },
+                "type": "string"
+              },
+              {
+                "name": "spaceId",
+                "in": "path",
+                "description": "Choose a space",
+                "required": true,
+                "x-ms-summary": "Confluence Space",
+                "x-ms-dynamic-values": {
+                  "operationId": "GetSpaces",
+                  "parameters": {
+                    "cloudId": {
+                      "parameter": "cloudId"
+                    }
+                  },
+                  "value-collection": "value",
+                  "value-path": "id",
+                  "value-title": "name"
+                },
+                "type": "string"
+              },
+              {
+                "name": "pageId",
+                "in": "path",
+                "description": "Choose a page",
+                "required": true,
+                "x-ms-summary": "Confluence page",
+                "x-ms-dynamic-values": {
+                  "operationId": "GetPagesBySpace",
+                  "parameters": {
+                    "cloudId": {
+                      "parameter": "cloudId"
+                    },
+                    "spaceId": {
+                      "parameter": "spaceId"
+                    }
+                  },
+                  "value-collection": "value",
+                  "value-path": "id",
+                  "value-title": "title"
+                },
+                "type": "string"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "OK",
+                "schema": {
+                  "$ref": "#/definitions/GetPagesResponse"
+                }
+              }
+            },
+            "deprecated": false,
+            "x-ms-api-annotation": {
+              "status": "Production"
+            },
+            "externalDocs": {
+              "url": "https://docs.microsoft.com/connectors/confluence/#get-page-content-and-metadata"
+            }
+          }
+        }
+      },
+      "definitions": {
+        "AccessibleResourcesResponse": {
+          "description": "List of websites user gave our oauth app access to",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "description": "Unique ID of the website.",
+                "type": "string",
+                "x-ms-summary": "Website Id"
+              },
+              "url": {
+                "description": "Url of the website.",
+                "type": "string",
+                "x-ms-summary": "Website url"
+              },
+              "name": {
+                "description": "Name of the website.",
+                "type": "string",
+                "x-ms-summary": "Website name"
+              }
+            }
+          },
+          "x-ms-summary": "Websites"
+        },
+        "GetSpacesResponse": {
+          "description": "List of spaces in the specified website",
+          "type": "object",
+          "properties": {
+            "value": {
+              "description": "List of spaces",
+              "type": "array",
+              "x-ms-summary": "Spaces",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "description": "Unique ID of the space.",
+                    "type": "string",
+                    "x-ms-summary": "Space Id"
+                  },
+                  "name": {
+                    "description": "Name of the space.",
+                    "type": "string",
+                    "x-ms-summary": "Space name"
+                  },
+                  "type": {
+                    "description": "Type of space.",
+                    "type": "string",
+                    "x-ms-summary": "Space type"
+                  }
+                }
+              }
+            }
+          },
+          "x-ms-summary": "Get spaces result"
+        },
+        "GetPagesResponse": {
+          "description": "List of pages in the specified website",
+          "type": "object",
+          "properties": {
+            "value": {
+              "description": "List of pages",
+              "type": "array",
+              "x-ms-summary": "Pages",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "description": "Unique ID of the page.",
+                    "type": "string",
+                    "x-ms-summary": "Page Id"
+                  },
+                  "title": {
+                    "description": "Title of the page.",
+                    "type": "string",
+                    "x-ms-summary": "Page title"
+                  },
+                  "spaceId": {
+                    "description": "Id of the space the page belongs to",
+                    "type": "string",
+                    "x-ms-summary": "Space id"
+                  },
+                  "status": {
+                    "description": "Status of the page.",
+                    "type": "string",
+                    "x-ms-summary": "Page Status"
+                  },
+                  "body": {
+                    "type": "object",
+                    "properties": {
+                      "storage": {
+                        "type": "object",
+                        "properties": {
+                          "representation": {
+                            "type": "string",
+                            "description": "Representation format of the content",
+                            "x-ms-summary": "Content representation"
+                          },
+                          "value": {
+                            "type": "string",
+                            "description": "Content of the page",
+                            "x-ms-summary": "Content of the page"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x-ms-summary": "Get pages result"
+        }
+      },
+      "parameters": {},
+      "responses": {},
+      "tags": [],
+      "x-ms-connector-metadata": [
+        {
+          "propertyName": "Website",
+          "propertyValue": "https://www.atlassian.com/software/confluence"
+        },
+        {
+          "propertyName": "Privacy policy",
+          "propertyValue": "https://www.atlassian.com/legal/privacy-policy"
+        },
+        {
+          "propertyName": "Categories",
+          "propertyValue": "Productivity"
+        }
+      ],
+      "externalDocs": {
+        "url": "https://docs.microsoft.com/connectors/confluence"
+      }
+    },
+    "runtimeUrls": [
+      "https://4ce29894-044d-e3ec-9ae5-cc6cd8ff0544.10.common.europe002.azure-apihub.net/apim/confluence"
+    ],
+    "primaryRuntimeUrl": "https://4ce29894-044d-e3ec-9ae5-cc6cd8ff0544.10.common.europe002.azure-apihub.net/apim/confluence",
+    "doNotUseApiHubNetRuntimeUrl": "https://4ce29894-044d-e3ec-9ae5-cc6cd8ff0544.10.common.europe002.azure-apihub.net/apim/confluence",
+    "metadata": {
+      "source": "marketplace",
+      "brandColor": "#FFFFFF",
+      "useNewApimVersion": "true",
+      "version": {
+        "previous": "releases/v1.0.1811\\1.0.1811.4737",
+        "current": "releases/v1.0.1819\\1.0.1819.4795"
+      }
+    },
+    "capabilities": [
+      "actions",
+      "federatedKnowledgeSource"
+    ],
+    "interfaces": {},
+    "description": "Confluence is your connected workspace, designed for collaboration and built to last",
+    "createdTime": "2025-05-18T05:07:24.9135392Z",
+    "changedTime": "2026-07-13T16:42:34.0758746Z",
+    "releaseTag": "Production",
+    "tier": "Standard",
+    "publisher": "Microsoft",
+    "scopes": {
+      "will": [],
+      "wont": []
+    },
+    "rateLimit": 0,
+    "apiVersion": "None"
+  }
+}

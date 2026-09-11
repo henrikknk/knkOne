@@ -43,6 +43,16 @@
         "planner"
       ],
       "dataSets": {}
+    },
+    "2e3e8282-2c3e-4934-96b5-61921b1a8299": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_confluence",
+      "displayName": "Confluence",
+      "dataSources": [
+        "confluence"
+      ],
+      "authenticationType": "OAuth",
+      "sharedConnectionId": "/providers/Microsoft.PowerApps/apis/shared_confluence/connections/d9d41e00e76f477d9f72d5b3dbb766b8",
+      "dataSets": {}
     }
   },
   "databaseReferences": {

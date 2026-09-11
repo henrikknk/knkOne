@@ -6,6 +6,7 @@ import { useTheme, type Theme } from './hooks/useTheme'
 import type { WidgetDef, WidgetProps, WidgetSize } from './components/widgetTypes'
 import AktivitaetenWidget from './widgets/AktivitaetenWidget'
 import AuslastungWidget from './widgets/AuslastungWidget'
+import ConfluenceWidget from './widgets/ConfluenceWidget'
 import KundensignaleWidget from './widgets/KundensignaleWidget'
 import KundenticketsWidget from './widgets/KundenticketsWidget'
 import OfflineWidget from './widgets/OfflineWidget'
@@ -54,7 +55,7 @@ const CATALOG: CatalogEntry[] = [
   { id: 'kundensignale', title: 'Kundensignale', ...SOURCES.web, component: KundensignaleWidget },
   { id: 'kundenhistorie', title: 'Kundenhistorie', ...SOURCES.dynamics, component: OfflineWidget },
   { id: 'umsaetze', title: 'Umsätze', ...SOURCES.nav, component: OfflineWidget },
-  { id: 'confluence', title: 'Confluence', ...SOURCES.confluence, component: OfflineWidget },
+  { id: 'confluence', title: 'Confluence', ...SOURCES.confluence, component: ConfluenceWidget },
   { id: 'teams', title: 'Teams-Aktivität', ...SOURCES.teams, component: OfflineWidget },
 ]
 
