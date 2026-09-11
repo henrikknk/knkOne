@@ -206,6 +206,10 @@
 .widget-action:hover { background: var(--surface-2); color: var(--text); }
 .widget-action[aria-pressed='true'] { background: var(--brand-soft); color: var(--brand); }
 .widget-action:focus-visible { outline: none; box-shadow: var(--focus); }
+.widget-action:disabled { cursor: default; opacity: 0.6; }
+.widget-action:disabled:hover { background: transparent; color: var(--text-muted); }
+.widget-action .is-spinning { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .widget-remove {
   display: inline-flex; align-items: center; justify-content: center; flex: none;
   width: 28px; height: 28px; border: 0; border-radius: var(--radius-sm);

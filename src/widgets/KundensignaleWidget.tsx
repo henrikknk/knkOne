@@ -8,8 +8,9 @@ import type { WidgetProps } from '../components/widgetTypes'
 const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY
 const PERPLEXITY_ENDPOINT = 'https://api.perplexity.ai/chat/completions'
 
-// Schalter zum Sparen von Perplexity-Tokens: auf true setzen, um die Live-Abfrage wieder zu aktivieren.
-const KUNDENSIGNALE_LIVE_ENABLED = false
+// Schalter zum Sparen von Perplexity-Tokens: auf false setzen, um die Live-Abfrage abzuschalten.
+// Aktiv lädt das Widget die Signale beim Öffnen der App und bietet einen Knopf zum Neuladen.
+const KUNDENSIGNALE_LIVE_ENABLED = true
 
 // Kundenliste für die Kundensignale.
 const KNK_CUSTOMERS = [
@@ -149,6 +150,9 @@ function initialState(): SignalsState {
 // Live-Widget: aktuelle Kundensignale über die Perplexity-API; Ergebnisse erscheinen Kunde für Kunde.
 export default function KundensignaleWidget(props: WidgetProps) {
   const [state, setState] = useState<SignalsState>(initialState)
+  const [reloadKey, setReloadKey] = useState(0)
+  const canReload = KUNDENSIGNALE_LIVE_ENABLED && Boolean(PERPLEXITY_API_KEY)
+  const loading = state.kind === 'loading'
 
   useEffect(() => {
     if (!KUNDENSIGNALE_LIVE_ENABLED || !PERPLEXITY_API_KEY) return
@@ -184,10 +188,46 @@ export default function KundensignaleWidget(props: WidgetProps) {
       cancelled = true
       controller.abort()
     }
-  }, [])
+  }, [reloadKey])
+
+  // Beginnt die Abfrage von vorn; die laufende bricht der Effekt-Cleanup ab.
+  function reload() {
+    setState({ kind: 'loading', signals: [], progress: '' })
+    setReloadKey((key) => key + 1)
+  }
 
   return (
-    <WidgetFrame {...props}>
+    <WidgetFrame
+      {...props}
+      actions={
+        canReload ? (
+          <button
+            type="button"
+            className="widget-action"
+            onClick={reload}
+            disabled={loading}
+            aria-label="Kundensignale neu laden"
+            title={loading ? 'Kundensignale werden geladen …' : 'Kundensignale neu laden'}
+          >
+            <svg
+              className={loading ? 'is-spinning' : undefined}
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 12a8 8 0 1 1-2.34-5.66" />
+              <path d="M20 4v5h-5" />
+            </svg>
+          </button>
+        ) : undefined
+      }
+    >
       {state.kind === 'paused' || state.kind === 'offline' ? (
         <WidgetNotice kind={state.kind} text={state.text} />
       ) : state.signals.length === 0 ? (
