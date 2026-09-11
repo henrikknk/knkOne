@@ -5,7 +5,7 @@ import { crmRecordUrl, lookupName } from './Dataverse'
 import { activitiesTable } from './tables'
 
 // Aufgaben aus Dynamics 365 kommen per serverseitiger Synchronisierung über Exchange nach To Do - dort ohne CRM-Bezug.
-// Der Bezug wird über die offenen CRM-Aufgaben des Benutzers wiederhergestellt.
+// Über die offenen CRM-Aufgaben des Benutzers werden Absprung zur Aufgabe und Bezug wiederhergestellt.
 
 export interface CrmReference {
   /** Anzeigename des Datensatzes, an dem die Aufgabe hängt */
@@ -13,6 +13,13 @@ export interface CrmReference {
   /** Art des Datensatzes, z. B. „Verkaufschance“ */
   entityLabel: string
   url?: string
+}
+
+export interface CrmTaskInfo {
+  /** Direktlink auf die Aufgabe im CRM */
+  url?: string
+  /** Datensatz, an dem die Aufgabe hängt - null, wenn kein Bezug gesetzt ist */
+  regarding: CrmReference | null
 }
 
 const TASK_TYPE_CODE = 4212
@@ -34,7 +41,7 @@ interface CrmTask {
   exchangeId: string | null
   subjectKey: string
   dueTime: number | null
-  reference: CrmReference
+  info: CrmTaskInfo
 }
 
 function subjectKey(subject: string) {
@@ -51,48 +58,50 @@ function isTask(record: { activitytypecode?: unknown }) {
   return Number(record.activitytypecode) === TASK_TYPE_CODE || String(record.activitytypecode).toLowerCase() === 'task'
 }
 
+function regardingReference(raw: Record<string, unknown>, orgUrl: string | undefined): CrmReference | null {
+  const regardingId = typeof raw._regardingobjectid_value === 'string' ? raw._regardingobjectid_value : null
+  if (!regardingId) return null
+  const logicalName =
+    [raw.regardingobjecttypecode, raw['_regardingobjectid_value@Microsoft.Dynamics.CRM.lookuplogicalname']].find(
+      (value): value is string => typeof value === 'string' && value !== '',
+    ) ?? null
+  const name = lookupName(raw, 'regardingobjectid')
+  return {
+    name: name && name !== regardingId ? name : 'Datensatz',
+    entityLabel: logicalName ? (ENTITY_LABELS[logicalName] ?? logicalName) : 'CRM',
+    url: logicalName ? crmRecordUrl(orgUrl, logicalName, regardingId) : undefined,
+  }
+}
+
 async function loadOpenCrmTasks(): Promise<CrmTask[]> {
   const { userId, orgUrl } = await crmContext()
   // Kein $select: der polymorphe Lookup „regardingobjectid“ kommt nur mit dem vollständigen Datensatz zuverlässig mit.
-  const records = await activitiesTable.getAll({
-    filter: `statecode eq 0 and _ownerid_value eq ${userId} and _regardingobjectid_value ne null`,
-  })
-  return records.filter(isTask).flatMap((record) => {
-    const raw = record as unknown as Record<string, unknown>
-    const regardingId = typeof raw._regardingobjectid_value === 'string' ? raw._regardingobjectid_value : null
-    if (!regardingId) return []
-    const logicalName =
-      [raw.regardingobjecttypecode, raw['_regardingobjectid_value@Microsoft.Dynamics.CRM.lookuplogicalname']].find(
-        (value): value is string => typeof value === 'string' && value !== '',
-      ) ?? null
-    const name = lookupName(record, 'regardingobjectid')
+  const records = await activitiesTable.getAll({ filter: `statecode eq 0 and _ownerid_value eq ${userId}` })
+  return records.filter(isTask).map((record) => {
     const due = toCalendarDate(record.scheduledend)
-    return [
-      {
-        exchangeId: record.exchangeitemid ? exchangeIdKey(record.exchangeitemid) : null,
-        subjectKey: subjectKey(record.subject ?? ''),
-        dueTime: due ? due.getTime() : null,
-        reference: {
-          name: name && name !== regardingId ? name : 'Datensatz',
-          entityLabel: logicalName ? (ENTITY_LABELS[logicalName] ?? logicalName) : 'CRM',
-          url: logicalName ? crmRecordUrl(orgUrl, logicalName, regardingId) : undefined,
-        },
+    return {
+      exchangeId: record.exchangeitemid ? exchangeIdKey(record.exchangeitemid) : null,
+      subjectKey: subjectKey(record.subject ?? ''),
+      dueTime: due ? due.getTime() : null,
+      info: {
+        url: crmRecordUrl(orgUrl, 'task', record.activityid),
+        regarding: regardingReference(record as unknown as Record<string, unknown>, orgUrl),
       },
-    ]
+    }
   })
 }
 
 const openCrmTasks = sharedRequest(loadOpenCrmTasks, 60_000)
 
-export type CrmTaskMatcher = (task: { id: string; title: string; dueDate: string | null }) => CrmReference | null
+export type CrmTaskMatcher = (task: { id: string; title: string; dueDate: string | null }) => CrmTaskInfo | null
 
 /** Ordnet To-Do-Aufgaben ihrer CRM-Aufgabe zu: über die Exchange-ID, sonst über den Betreff. */
 export async function loadCrmTaskMatcher(): Promise<CrmTaskMatcher> {
   const tasks = await openCrmTasks()
-  const byExchangeId = new Map<string, CrmReference>()
+  const byExchangeId = new Map<string, CrmTaskInfo>()
   const bySubject = new Map<string, CrmTask[]>()
   for (const task of tasks) {
-    if (task.exchangeId) byExchangeId.set(task.exchangeId, task.reference)
+    if (task.exchangeId) byExchangeId.set(task.exchangeId, task.info)
     bySubject.set(task.subjectKey, [...(bySubject.get(task.subjectKey) ?? []), task])
   }
 
@@ -100,10 +109,10 @@ export async function loadCrmTaskMatcher(): Promise<CrmTaskMatcher> {
     const direct = byExchangeId.get(exchangeIdKey(todo.id))
     if (direct) return direct
     const candidates = bySubject.get(subjectKey(todo.title)) ?? []
-    if (candidates.length <= 1) return candidates[0]?.reference ?? null
-    // Mehrere gleichnamige CRM-Aufgaben: nur bei eindeutiger Fälligkeit zuordnen - lieber kein Bezug als ein falscher.
+    if (candidates.length <= 1) return candidates[0]?.info ?? null
+    // Mehrere gleichnamige CRM-Aufgaben: nur bei eindeutiger Fälligkeit zuordnen - lieber kein Absprung als ein falscher.
     const due = toCalendarDate(todo.dueDate)?.getTime() ?? null
     const sameDue = candidates.filter((candidate) => candidate.dueTime !== null && candidate.dueTime === due)
-    return sameDue.length === 1 ? sameDue[0].reference : null
+    return sameDue.length === 1 ? sameDue[0].info : null
   }
 }

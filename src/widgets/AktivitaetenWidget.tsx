@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useId, useState } from 'react'
 import { ChartFrame, ColumnChart, type ChartColumn, type ChartSeries } from '../components/charts'
 import { ChartToggle, PagedRows, Pill, Row, TabSwitch, WidgetEmpty, WidgetFrame, WidgetNotice, WidgetSkeleton } from '../components/Widget'
 import type { WidgetProps } from '../components/widgetTypes'
@@ -6,8 +6,8 @@ import { useAsyncData } from '../hooks/useAsyncData'
 import { pagesFromAll, usePagedList } from '../hooks/usePagedList'
 import { formatShortDate, startOfDay } from '../lib/chartData'
 import { daysBetween, formatDate, toCalendarDate, type Urgency } from '../lib/format'
-import { loadCrmTaskMatcher, type CrmReference } from '../services/crmTasks'
-import { listMyPlannerTasks, type PlannerTaskRow } from '../services/planner'
+import { loadCrmTaskMatcher, type CrmReference, type CrmTaskInfo } from '../services/crmTasks'
+import { listMyPlannerTasks, loadPlannerDescription, type PlannerTaskRow } from '../services/planner'
 import { listMyOpenTodos, type TodoRow } from '../services/todo'
 
 type TaskTab = 'myday' | 'todo' | 'planner'
@@ -29,8 +29,8 @@ type TodoItem = TodoRow &
     source: 'todo'
     /** Tage bis zur Erinnerung, zum Ladezeitpunkt berechnet */
     reminderInDays: number | null
-    /** CRM-Datensatz, an dem die per Exchange synchronisierte Aufgabe hängt */
-    crm: CrmReference | null
+    /** Zugehörige CRM-Aufgabe (per Exchange synchronisiert): Absprung ins CRM und Bezug */
+    crm: CrmTaskInfo | null
   }
 type PlannerItem = PlannerTaskRow & DueInfo & { source: 'planner' }
 type TaskItem = TodoItem | PlannerItem
@@ -120,8 +120,72 @@ function CrmLink({ reference }: { reference: CrmReference }) {
   )
 }
 
+function CrmTaskLink({ url }: { url: string }) {
+  return (
+    <a className="crm-ref crm-ref--task" href={url} target="_blank" rel="noopener noreferrer" title="Aufgabe im CRM öffnen">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+      </svg>
+      CRM-Aufgabe
+    </a>
+  )
+}
+
+function ExpandButton({ expanded, controls, onToggle }: { expanded: boolean; controls: string; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      className={`row-expand${expanded ? ' is-expanded' : ''}`}
+      aria-expanded={expanded}
+      aria-controls={controls}
+      aria-label={expanded ? 'Beschreibung ausblenden' : 'Beschreibung anzeigen'}
+      title={expanded ? 'Beschreibung ausblenden' : 'Beschreibung anzeigen'}
+      onClick={onToggle}
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </button>
+  )
+}
+
+// Planner liefert die Beschreibung nicht mit der Aufgabenliste - sie wird erst beim Aufklappen geladen.
+function PlannerDescription({ taskId }: { taskId: string }) {
+  const load = useCallback(() => loadPlannerDescription(taskId), [taskId])
+  const data = useAsyncData(load)
+
+  if (data.status === 'loading') return <p className="row-details-status">Beschreibung wird geladen …</p>
+  if (data.status === 'error') {
+    return (
+      <p className="row-details-status">
+        Beschreibung konnte nicht geladen werden.{' '}
+        <button type="button" className="btn btn--ghost btn--small" onClick={data.reload}>
+          Erneut versuchen
+        </button>
+      </p>
+    )
+  }
+  return data.data ? <p className="row-description">{data.data}</p> : <p className="row-details-status">Keine Beschreibung hinterlegt</p>
+}
+
 /** Eine Aufgabe aus To-Do oder Planner; `showSource` kennzeichnet Planner-Aufgaben in der gemischten Liste „Mein Tag“. */
 function TaskRow({ item, showSource = false }: { item: TaskItem; showSource?: boolean }) {
+  const [expanded, setExpanded] = useState(false)
+  const detailsId = useId()
+  const hasDescription = item.source === 'todo' ? item.description !== '' : item.hasDescription
+
+  const aside = (
+    <>
+      <DueLabel item={item} />
+      {hasDescription && <ExpandButton expanded={expanded} controls={detailsId} onToggle={() => setExpanded((value) => !value)} />}
+    </>
+  )
+  const details = hasDescription ? (
+    <div id={detailsId} className="row-details" hidden={!expanded}>
+      {expanded && (item.source === 'todo' ? <p className="row-description">{item.description}</p> : <PlannerDescription taskId={item.id} />)}
+    </div>
+  ) : undefined
+
   if (item.source === 'planner') {
     return (
       <Row
@@ -133,7 +197,8 @@ function TaskRow({ item, showSource = false }: { item: TaskItem; showSource?: bo
           </>
         }
         tags={showSource ? <Pill tone="neutral">Mir zugewiesen</Pill> : undefined}
-        aside={<DueLabel item={item} />}
+        aside={aside}
+        details={details}
       />
     )
   }
@@ -142,16 +207,19 @@ function TaskRow({ item, showSource = false }: { item: TaskItem; showSource?: bo
     <Row
       urgency={dueUrgency(item, important)}
       title={item.title}
+      href={item.crm?.url}
       meta={`${item.list} · ${item.statusLabel}`}
       tags={
         important || item.crm ? (
           <>
             {important && <Pill tone="critical">Wichtig</Pill>}
-            {item.crm && <CrmLink reference={item.crm} />}
+            {item.crm?.url && <CrmTaskLink url={item.crm.url} />}
+            {item.crm?.regarding && <CrmLink reference={item.crm.regarding} />}
           </>
         ) : undefined
       }
-      aside={<DueLabel item={item} />}
+      aside={aside}
+      details={details}
     />
   )
 }

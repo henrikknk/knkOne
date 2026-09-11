@@ -69,6 +69,28 @@ export function monthOffset(from: Date, to: Date): number {
   return (to.getFullYear() - from.getFullYear()) * 12 + to.getMonth() - from.getMonth()
 }
 
+/** Monatsschlüssel YYYY-MM im lokalen Kalender. */
+export function monthKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+/** Anteil des Zeitraums [start, end), der bis `today` verstrichen ist - zwischen 0 und 1. */
+export function periodShare(start: Date, end: Date, today: Date): number {
+  const total = end.getTime() - start.getTime()
+  if (total <= 0) return today >= end ? 1 : 0
+  return Math.min(1, Math.max(0, (today.getTime() - start.getTime()) / total))
+}
+
+export type BudgetState = 'ok' | 'ahead' | 'over'
+
+/** Budget überschritten, mehr als 10 Prozentpunkte vor dem zeitlichen Soll oder im Plan. */
+export function budgetState(used: number, budget: number, expectedShare: number | null): BudgetState {
+  const share = budget > 0 ? used / budget : 0
+  if (share > 1) return 'over'
+  if (expectedShare !== null && share > expectedShare + 0.1) return 'ahead'
+  return 'ok'
+}
+
 export function formatShortDate(date: Date): string {
   return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
 }

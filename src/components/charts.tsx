@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { budgetState } from '../lib/chartData'
+import { Pill } from './Widget'
 
 // Schlanke SVG-Diagramme: dünne Marken, feine Raster, Tooltip per Zeiger und Tastatur,
 // Legende ab zwei Serien und eine Tabellenansicht als barrierefreie Alternative.
@@ -170,11 +172,28 @@ export interface LinePoint {
   label: string
   /** Ausführliche Beschriftung für den Tooltip */
   detail: string
-  values: Record<string, number>
+  /** null = kein Wert, z. B. Abgerechnetes in der Zukunft - die Linie endet davor */
+  values: Record<string, number | null>
+}
+
+interface LineChartProps {
+  series: ChartSeries[]
+  points: LinePoint[]
+  ariaLabel: string
+  /** Werte im Tooltip */
+  formatValue?: (value: number) => string
+  /** Achsenwerte und Endbeschriftungen, gern kompakt */
+  formatTick?: (value: number) => string
+  /** Senkrechte Markierung an einem Zeitpunkt, z. B. „heute“ */
+  marker?: { index: number; label: string }
+}
+
+function hasValue(value: number | null | undefined): value is number {
+  return typeof value === 'number'
 }
 
 /** Liniendiagramm mit einer y-Achse; Fadenkreuz und Tooltip zeigen alle Serien am gewählten Zeitpunkt. */
-export function LineChart({ series, points, ariaLabel }: { series: ChartSeries[]; points: LinePoint[]; ariaLabel: string }) {
+export function LineChart({ series, points, ariaLabel, formatValue = formatNumber, formatTick = formatNumber, marker }: LineChartProps) {
   const [plotRef, { width, height }] = useElementSize<HTMLDivElement>()
   const [active, setActive] = useState<number | null>(null)
   const last = points.length - 1
@@ -183,19 +202,39 @@ export function LineChart({ series, points, ariaLabel }: { series: ChartSeries[]
   const ticks = niceTicks(Math.max(0, ...points.flatMap((point) => series.map((item) => point.values[item.id] ?? 0))), true)
   const top = ticks[ticks.length - 1]
   const endLabels = width >= 440
-  const margin = { top: 12, right: endLabels ? 124 : 16, bottom: 24, left: 36 }
+  const tickLabelWidth = Math.max(...ticks.map((tick) => formatTick(tick).length)) * 6.2 + 12
+  const margin = { top: 12, right: endLabels ? 124 : 16, bottom: 24, left: Math.max(36, tickLabelWidth) }
   const plotW = Math.max(1, width - margin.left - margin.right)
   const plotH = Math.max(1, height - margin.top - margin.bottom)
   const x = (index: number) => margin.left + (last <= 0 ? plotW / 2 : (index / last) * plotW)
   const y = (value: number) => margin.top + plotH - (value / top) * plotH
   const labelEvery = Math.max(1, Math.ceil(56 / (plotW / Math.max(1, last))))
 
-  // Endbeschriftungen nur, wenn sie sich nicht überlappen - sonst tragen Legende und Tooltip die Zuordnung.
+  // Letzter vorhandener Wert je Serie - dort enden Linie, Punkt und Beschriftung.
+  const lastIndex = (id: string) => {
+    const defined = points.flatMap((point, index) => (hasValue(point.values[id]) ? [index] : []))
+    return defined.length > 0 ? defined[defined.length - 1] : -1
+  }
+  // Lücken unterbrechen die Linie statt sie auf 0 fallen zu lassen.
+  const linePath = (id: string) =>
+    points
+      .map((point, index) => {
+        const value = point.values[id]
+        if (!hasValue(value)) return ''
+        return `${index > 0 && hasValue(points[index - 1].values[id]) ? 'L' : 'M'}${x(index)},${y(value)}`
+      })
+      .join(' ')
+
+  // Endbeschriftungen nur, wenn alle Linien am rechten Rand enden und sich nicht überlappen -
+  // sonst tragen Legende und Tooltip die Zuordnung.
   const ends = series
-    .map((item) => ({ series: item, value: points[last]?.values[item.id] ?? 0 }))
-    .map((end) => ({ ...end, y: y(end.value) }))
+    .flatMap((item) => {
+      const index = lastIndex(item.id)
+      const value = index >= 0 ? points[index].values[item.id] : null
+      return hasValue(value) ? [{ series: item, index, value, y: y(value) }] : []
+    })
     .sort((a, b) => a.y - b.y)
-  const endsCollide = ends.some((end, index) => index > 0 && end.y - ends[index - 1].y < 14)
+  const endsCollide = ends.some((end, index) => end.index !== last || (index > 0 && end.y - ends[index - 1].y < 14))
 
   return (
     <div ref={plotRef} className="chart-plot">
@@ -225,10 +264,18 @@ export function LineChart({ series, points, ariaLabel }: { series: ChartSeries[]
             <g key={tick}>
               <line className={tick === 0 ? 'chart-baseline' : 'chart-grid'} x1={margin.left} x2={margin.left + plotW} y1={y(tick)} y2={y(tick)} />
               <text className="chart-tick" x={margin.left - 8} y={y(tick)} dy="0.32em" textAnchor="end">
-                {formatNumber(tick)}
+                {formatTick(tick)}
               </text>
             </g>
           ))}
+          {marker && marker.index >= 0 && marker.index <= last && (
+            <g className="chart-marker" aria-hidden="true">
+              <line x1={x(marker.index)} x2={x(marker.index)} y1={margin.top} y2={margin.top + plotH} />
+              <text x={x(marker.index) + 4} y={margin.top + 10} textAnchor="start">
+                {marker.label}
+              </text>
+            </g>
+          )}
           {points.map((point, index) =>
             (last - index) % labelEvery === 0 ? (
               <text key={point.key} className="chart-tick" x={x(index)} y={height - 6} textAnchor={index === last ? 'end' : index === 0 ? 'start' : 'middle'}>
@@ -238,25 +285,18 @@ export function LineChart({ series, points, ariaLabel }: { series: ChartSeries[]
           )}
           {shown !== null && <line className="chart-crosshair" x1={x(shown)} x2={x(shown)} y1={margin.top} y2={margin.top + plotH} />}
           {series.map((item) => (
-            <path
-              key={item.id}
-              d={points.map((point, index) => `${index === 0 ? 'M' : 'L'}${x(index)},${y(point.values[item.id] ?? 0)}`).join(' ')}
-              fill="none"
-              stroke={item.color}
-              strokeWidth={2}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
+            <path key={item.id} d={linePath(item.id)} fill="none" stroke={item.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
           ))}
           {series.map((item) => {
-            const index = shown ?? last
-            return <circle key={item.id} className="chart-dot" cx={x(index)} cy={y(points[index].values[item.id] ?? 0)} r={5} fill={item.color} />
+            const index = shown ?? lastIndex(item.id)
+            const value = index >= 0 ? points[index].values[item.id] : null
+            return hasValue(value) ? <circle key={item.id} className="chart-dot" cx={x(index)} cy={y(value)} r={5} fill={item.color} /> : null
           })}
           {endLabels &&
             !endsCollide &&
             ends.map((end) => (
               <text key={end.series.id} className="chart-end-label" x={x(last) + 12} y={end.y} dy="0.32em">
-                {`${end.series.label} ${formatNumber(end.value)}`}
+                {`${end.series.label} ${formatTick(end.value)}`}
               </text>
             ))}
         </svg>
@@ -266,7 +306,10 @@ export function LineChart({ series, points, ariaLabel }: { series: ChartSeries[]
           x={x(shown)}
           width={width}
           title={points[shown].detail}
-          rows={series.map((item) => ({ key: item.id, color: item.color, value: formatNumber(points[shown].values[item.id] ?? 0), label: item.label }))}
+          rows={series.map((item) => {
+            const value = points[shown].values[item.id]
+            return { key: item.id, color: item.color, value: hasValue(value) ? formatValue(value) : '–', label: item.label }
+          })}
         />
       )}
     </div>
@@ -435,5 +478,52 @@ export function BarList({ items, color, ariaLabel, formatValue = formatNumber }:
         </li>
       ))}
     </ul>
+  )
+}
+
+interface BudgetMeterProps {
+  label: string
+  used: number
+  budget: number
+  /** Zeitlicher Soll-Anteil heute (0-1), null ohne Zeitbezug */
+  expectedShare: number | null
+  formatValue?: (value: number) => string
+}
+
+/**
+ * Budgetausschöpfung als Balken: die Füllung trägt den Zustand (Grundfarbe, Warnung, kritisch), die Spur ist eine
+ * hellere Stufe derselben Farbe; die Markierung zeigt das zeitliche Soll. Der Zustand steht zusätzlich als Text daneben.
+ */
+export function BudgetMeter({ label, used, budget, expectedShare, formatValue = formatNumber }: BudgetMeterProps) {
+  const share = budget > 0 ? used / budget : 0
+  const percent = Math.round(share * 100)
+  const state = budgetState(used, budget, expectedShare)
+  const statusLabel = state === 'over' ? 'Budget überschritten' : state === 'ahead' ? 'Über Plan' : 'Im Plan'
+  const expectedPercent = expectedShare === null ? null : Math.round(Math.min(Math.max(expectedShare, 0), 1) * 100)
+  return (
+    <span className={`meter meter--${state}`}>
+      <span className="meter-head">
+        <span className="meter-label">{label}</span>
+        <span className="meter-value">
+          <strong>{formatValue(used)}</strong> von {formatValue(budget)} · {percent} %
+        </span>
+      </span>
+      <span
+        className="meter-track"
+        role="meter"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.min(percent, 100)}
+        aria-valuetext={`${formatValue(used)} von ${formatValue(budget)}, ${percent} Prozent, ${statusLabel}`}
+      >
+        <span className="meter-fill" style={{ width: `${Math.min(share, 1) * 100}%` }} />
+        {expectedPercent !== null && <span className="meter-expected" style={{ left: `${expectedPercent}%` }} />}
+      </span>
+      <span className="meter-foot">
+        <Pill tone={state === 'over' ? 'critical' : state === 'ahead' ? 'warning' : 'success'}>{statusLabel}</Pill>
+        {expectedPercent !== null && <span>Soll heute {expectedPercent} %</span>}
+      </span>
+    </span>
   )
 }

@@ -45,7 +45,9 @@ const EVENTS_FUTURE_DAYS = 90
 
 async function searchTodos() {
   const todos = await listMyOpenTodos()
-  return todos.map((todo) => toRecord(todo.id, todo.title, [todo.list, todo.statusLabel, todo.dueDate && `fällig ${formatDate(todo.dueDate)}`]))
+  return todos.map((todo) =>
+    toRecord(todo.id, todo.title, [todo.list, todo.statusLabel, todo.dueDate && `fällig ${formatDate(todo.dueDate)}`], undefined, [todo.description]),
+  )
 }
 
 async function searchPlannerTasks() {

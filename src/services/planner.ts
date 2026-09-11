@@ -12,6 +12,8 @@ export interface PlannerTaskRow {
   title: string
   /** Name des Plans, aus dem die Aufgabe stammt */
   plan: string
+  /** Die Beschreibung selbst lädt erst loadPlannerDescription. */
+  hasDescription: boolean
   statusLabel: string
   /** Fälligkeit als ISO-Zeitpunkt, null wenn keine gesetzt ist */
   dueDate: string | null
@@ -28,6 +30,7 @@ function toRow(task: GetTask_Response_V2, planTitles: Map<string, string>): Plan
     id: task.id ?? '',
     title: task.title || 'Ohne Titel',
     plan: (task.planId && planTitles.get(task.planId)) || 'Unbekannter Plan',
+    hasDescription: task.hasDescription === true,
     statusLabel: statusLabel(task.percentComplete ?? 0),
     dueDate: task.dueDateTime || null,
     created: task.createdDateTime ?? null,
@@ -69,6 +72,22 @@ export async function listMyPlannerTasks(): Promise<PlannerTaskRow[]> {
     .filter((task) => (task.percentComplete ?? 0) < COMPLETE)
     .map((task) => toRow(task, planTitles))
     .sort(compareTasks)
+}
+
+const descriptions = new Map<string, Promise<string>>()
+
+/** Beschreibung einer Planner-Aufgabe - erst beim Aufklappen geladen und je Aufgabe zwischengespeichert. */
+export function loadPlannerDescription(taskId: string): Promise<string> {
+  const cached = descriptions.get(taskId)
+  if (cached) return cached
+  const request = runConnector('Planner: GetTaskDetails_V2', () => PlannerService.GetTaskDetails_V2(taskId))
+    .then((details) => (details?.description ?? '').trim())
+    .catch((error: unknown) => {
+      descriptions.delete(taskId)
+      throw error
+    })
+  descriptions.set(taskId, request)
+  return request
 }
 
 /** Anlage- und Erledigungszeitpunkte der mir zugewiesenen Planner-Aufgaben - für den Auslastungsverlauf. */

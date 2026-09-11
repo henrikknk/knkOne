@@ -241,7 +241,19 @@
 .row-meta { font-size: 12.5px; color: var(--text-muted); overflow-wrap: anywhere; }
 .row-meta strong { color: var(--text); font-weight: 600; }
 .row-tags { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 3px; }
-.row-aside { flex: none; display: flex; align-items: center; padding-top: 1px; }
+.row-aside { flex: none; display: flex; align-items: center; gap: 6px; padding-top: 1px; }
+.row-expand {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 26px; height: 26px; border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-muted); cursor: pointer;
+}
+.row-expand:hover { background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text); }
+.row-expand:focus-visible { outline: none; box-shadow: var(--focus); }
+.row-expand svg { transition: transform 0.15s ease; }
+.row-expand.is-expanded svg { transform: rotate(180deg); }
+.row-details { margin-top: 6px; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); }
+.row-description { max-height: 240px; overflow-y: auto; font-size: 12.5px; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.row-details-status { font-size: 12.5px; color: var(--text-muted); }
 .text-accent { color: var(--brand) !important; }
 .amount { font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text); }
 
@@ -273,6 +285,62 @@
 .crm-ref-type { flex: none; font-weight: 500; color: var(--text-muted); }
 .crm-ref-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 a.crm-ref:hover { border-color: var(--brand); color: var(--brand); }
+.crm-ref--task { color: var(--brand); }
+
+/* Kundentickets: Filterleiste und Vorgangsarten */
+.issue-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; }
+/* Beschriftung und Auswahl brechen gemeinsam um */
+.issue-filter { display: inline-flex; align-items: center; gap: 8px; min-width: 0; max-width: 100%; }
+.issue-filter-label { font-size: 12.5px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.issue-filter-hint { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+.select {
+  min-width: 0; max-width: min(100%, 320px); height: 32px; padding: 0 8px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); font: inherit; font-size: 13px; cursor: pointer;
+}
+.select:hover { border-color: var(--brand); }
+.select:focus-visible { outline: none; border-color: var(--brand); box-shadow: var(--focus); }
+.issue-type {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 22px; padding: 0 8px 0 6px;
+  border: 1px solid transparent; border-radius: 99px; font-size: 11.5px; font-weight: 700; white-space: nowrap; line-height: 1;
+}
+.issue-type svg { flex: none; }
+.issue-type--bug { color: var(--critical); background: var(--critical-soft); border-color: color-mix(in srgb, var(--critical) 30%, transparent); }
+.issue-type--cr { color: var(--issue-cr); background: var(--issue-cr-soft); border-color: color-mix(in srgb, var(--issue-cr) 30%, transparent); }
+.issue-type--ticket { color: var(--brand); background: var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent); }
+.issue-updated { font-size: 12px; color: var(--text-subtle); white-space: nowrap; }
+
+/* Budget-Meter: die Füllung trägt den Zustand, die Spur ist eine hellere Stufe derselben Farbe */
+.meter { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.meter-head, .meter-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2px 8px; font-size: 12px; color: var(--text-muted); }
+.meter-value strong { color: var(--text); }
+.meter-track { position: relative; display: block; height: 10px; border-radius: 99px; background: color-mix(in srgb, var(--meter-color) 18%, var(--surface)); }
+.meter-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 99px; background: var(--meter-color); }
+.meter-expected { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--text); }
+.meter--ok { --meter-color: var(--brand); }
+.meter--ahead { --meter-color: var(--warning); }
+.meter--over { --meter-color: var(--critical); }
+
+/* Projektbudgets */
+.budget-summary { margin: 4px 6px 6px; font-size: 12.5px; color: var(--text-muted); }
+.budget-summary strong { color: var(--text); }
+.budget-note { display: block; margin-top: 4px; font-size: 12px; color: var(--text-subtle); }
+.budget-split { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; padding: 4px 2px 0; }
+.budget-projects { min-height: 0; overflow-y: auto; margin: 0; padding: 0 2px 0 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.budget-project {
+  display: block; width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); text-align: left; cursor: pointer;
+}
+.budget-project:hover { border-color: var(--brand); }
+.budget-project.is-selected { border-color: var(--brand); background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
+.budget-project:focus-visible { outline: none; box-shadow: var(--focus); }
+.budget-project-title { display: block; font-size: 13.5px; font-weight: 600; }
+.budget-project-meta { display: block; font-size: 12px; color: var(--text-muted); }
+.budget-chart { display: flex; flex-direction: column; min-width: 0; min-height: 260px; }
+.budget-chart-head { display: flex; flex-direction: column; padding: 2px 4px 0; }
+.budget-chart-head strong { font-size: 13.5px; }
+.budget-chart-head span { font-size: 12px; color: var(--text-muted); }
+.crm-ref--task svg { flex: none; }
 a.crm-ref:focus-visible { outline: none; box-shadow: var(--focus); }
 
 /* Vertragsübersicht: feste Termine */

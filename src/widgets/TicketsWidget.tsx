@@ -5,8 +5,8 @@ import type { WidgetProps } from '../components/widgetTypes'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { usePagedList, type PageLoader } from '../hooks/usePagedList'
 import { countBy } from '../lib/chartData'
-import { daysBetween, relativeDays, toCalendarDate, type Urgency } from '../lib/format'
-import { listAllMyIssues, loadMyIssuesPage, type JiraCursor, type JiraIssueRow } from '../services/jira'
+import { daysBetween, relativeDays, toCalendarDate } from '../lib/format'
+import { issueUrgency, listAllMyIssues, loadMyIssuesPage, type JiraCursor, type JiraIssueRow } from '../services/jira'
 
 interface TicketItem extends JiraIssueRow {
   /** Tage bis zur Fälligkeit, zum Ladezeitpunkt berechnet */
@@ -23,14 +23,6 @@ const loadTickets: PageLoader<TicketItem, JiraCursor> = async (cursor) => {
       return { ...issue, dueInDays: due ? daysBetween(today, due) : null }
     }),
   }
-}
-
-// Kritisch nur, wenn wir am Zug sind: hohe Priorität oder überschrittene Fälligkeit.
-function ticketUrgency(ticket: TicketItem): Urgency {
-  if (ticket.turn === 'customer') return 'muted'
-  if (ticket.isHighPriority || (ticket.dueInDays !== null && ticket.dueInDays < 0)) return 'critical'
-  if (ticket.dueInDays !== null && ticket.dueInDays <= 3) return 'warning'
-  return 'normal'
 }
 
 type TicketGrouping = 'status' | 'project'
@@ -78,7 +70,7 @@ export default function TicketsWidget(props: WidgetProps) {
           renderItem={(ticket) => (
             <Row
               key={ticket.key}
-              urgency={ticketUrgency(ticket)}
+              urgency={issueUrgency(ticket, ticket.dueInDays)}
               title={ticket.summary}
               href={ticket.url}
               meta={`${ticket.key} · ${ticket.project} · ${ticket.status}`}

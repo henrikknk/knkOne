@@ -33,6 +33,10 @@
   --series-4: #eda100;
   --series-5: #e87ba4;
 
+  /* Jira-Vorgangsart Change Request (Bug nutzt --critical, Ticket die Grundfarbe) */
+  --issue-cr: #5b3cc4;
+  --issue-cr-soft: #efeafd;
+
   --sidebar-bg: var(--brand);
   --sidebar-bg-strong: var(--brand-strong);
   --sidebar-text: rgba(255, 255, 255, 0.78);
@@ -90,6 +94,8 @@
     --series-3: #199e70;
     --series-4: #c98500;
     --series-5: #d55181;
+    --issue-cr: #b7a4ff;
+    --issue-cr-soft: #2a2346;
     --sidebar-bg: #0a2a42;
     --sidebar-bg-strong: #061b2b;
     --dashboard-bg-start: #0e3452;
@@ -124,6 +130,8 @@
   --series-3: #199e70;
   --series-4: #c98500;
   --series-5: #d55181;
+  --issue-cr: #b7a4ff;
+  --issue-cr-soft: #2a2346;
   --sidebar-bg: #0a2a42;
   --sidebar-bg-strong: #061b2b;
   --dashboard-bg-start: #0e3452;

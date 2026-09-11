@@ -55,6 +55,23 @@ export function deadlineUrgency(days: number | null): Urgency {
   return 'normal'
 }
 
+const NO_BREAK_SPACE = String.fromCharCode(160)
+
+/** Klartext aus HTML, z. B. Aufgabenbeschreibungen - DOMParser führt nichts aus; Absätze und Umbrüche bleiben erhalten. */
+export function htmlToText(html: string): string {
+  const withBreaks = html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|tr|h[1-6])>/gi, '\n')
+  const doc = new DOMParser().parseFromString(withBreaks, 'text/html')
+  // Aus Outlook stammende Beschreibungen können Stilblöcke im Body enthalten - deren Inhalt ist kein Text.
+  doc.querySelectorAll('style, script').forEach((element) => element.remove())
+  const text = doc.body.textContent ?? ''
+  return text
+    .split(NO_BREAK_SPACE)
+    .join(' ')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 export function errorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message) return error.message
   if (typeof error === 'string' && error) return error

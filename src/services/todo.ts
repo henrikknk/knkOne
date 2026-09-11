@@ -1,6 +1,7 @@
 import { MicrosoftTo_Do_Business_Service as ToDoService } from '../generated/services/MicrosoftTo_Do_Business_Service'
 import type { ToDo_V2, ToDo_V2importance, ToDo_V2status } from '../generated/models/MicrosoftTo_Do_Business_Model'
 import { timelineItem, type TimelineItem } from '../lib/chartData'
+import { htmlToText } from '../lib/format'
 import { sharedRequest } from '../lib/sharedRequest'
 import { runConnector } from './Connector'
 
@@ -19,6 +20,8 @@ const STATUS_LABELS: Record<ToDo_V2status, string> = {
 export interface TodoRow {
   id: string
   title: string
+  /** Beschreibung als Klartext, leer wenn keine hinterlegt ist */
+  description: string
   list: string
   /** Aufgabe liegt in der Standardliste „Aufgaben“ - dorthin synchronisiert Exchange auch CRM-Aufgaben */
   defaultList: boolean
@@ -40,11 +43,17 @@ function utcTimestamp(value: string | undefined): string | null {
   return /(?:[zZ]|[+-]\d{2}:\d{2})$/.test(value) ? value : `${value}Z`
 }
 
+function description(task: ToDo_V2): string {
+  const content = task.body?.content ?? ''
+  return task.body?.contentType?.toLowerCase() === 'html' ? htmlToText(content) : content.trim()
+}
+
 function toRow(task: ToDo_V2, list: string, defaultList: boolean): TodoRow {
   const status = task.status ?? 'notStarted'
   return {
     id: task.id ?? '',
     title: task.title || 'Ohne Titel',
+    description: description(task),
     list,
     defaultList,
     status,

@@ -7,7 +7,9 @@ import type { WidgetDef, WidgetProps, WidgetSize } from './components/widgetType
 import AktivitaetenWidget from './widgets/AktivitaetenWidget'
 import AuslastungWidget from './widgets/AuslastungWidget'
 import KundensignaleWidget from './widgets/KundensignaleWidget'
+import KundenticketsWidget from './widgets/KundenticketsWidget'
 import OfflineWidget from './widgets/OfflineWidget'
+import ProjektbudgetsWidget from './widgets/ProjektbudgetsWidget'
 import TermineWidget from './widgets/TermineWidget'
 import TicketsWidget from './widgets/TicketsWidget'
 import VertragsuebersichtWidget from './widgets/VertragsuebersichtWidget'
@@ -20,7 +22,11 @@ interface RoleDef {
   widgets: string[]
 }
 
-type CatalogEntry = WidgetDef & { component: (props: WidgetProps) => ReactNode }
+type CatalogEntry = WidgetDef & {
+  component: (props: WidgetProps) => ReactNode
+  /** Größe, solange für die Rolle keine eigene gespeichert ist */
+  defaultSize?: WidgetSize
+}
 
 const SOURCES = {
   dynamics: { source: 'Dynamics 365', sourceShort: 'D365', color: '#004576' },
@@ -32,13 +38,16 @@ const SOURCES = {
   nav: { source: 'NAV / Datasets', sourceShort: 'NAV', color: '#107C10' },
   teams: { source: 'Microsoft Teams', sourceShort: 'TMS', color: '#5B5FC7' },
   combined: { source: 'Jira · Dynamics 365 · To-Do · Planner', sourceShort: 'ALLE', color: '#004576' },
+  erp: { source: 'Business Central', sourceShort: 'BC', color: '#00807F' },
 } satisfies Record<string, Omit<WidgetDef, 'id' | 'title'>>
 
 const CATALOG: CatalogEntry[] = [
   { id: 'auslastung', title: 'Auslastung', ...SOURCES.combined, component: AuslastungWidget },
+  { id: 'projektbudgets', title: 'Projektbudgets', ...SOURCES.erp, defaultSize: { cols: 2, rows: 1 }, component: ProjektbudgetsWidget },
   { id: 'vertragsuebersicht', title: 'Vertragsübersicht', ...SOURCES.dynamics, component: VertragsuebersichtWidget },
   { id: 'vertriebsvorgaenge', title: 'Vertriebsvorgänge', ...SOURCES.dynamics, component: VertriebsvorgaengeWidget },
   { id: 'tickets', title: 'Tickets', ...SOURCES.jira, component: TicketsWidget },
+  { id: 'kundentickets', title: 'Kundentickets', ...SOURCES.jira, defaultSize: { cols: 2, rows: 1 }, component: KundenticketsWidget },
   { id: 'aktivitaeten', title: 'Aktivitäten', ...SOURCES.todo, component: AktivitaetenWidget },
   // Die ID bleibt "kommunikation", damit gespeicherte Dashboard-Konfigurationen weiter passen.
   { id: 'kommunikation', title: 'Termine', ...SOURCES.outlook, component: TermineWidget },
@@ -66,13 +75,13 @@ const ROLES: RoleDef[] = [
     id: 'projektleitung',
     name: 'Projektleitung',
     desc: 'Tickets, Aktivitäten und Kundenanpassungen laufender Projekte',
-    widgets: ['tickets', 'aktivitaeten', 'confluence', 'kundenhistorie', 'teams'],
+    widgets: ['projektbudgets', 'tickets', 'aktivitaeten', 'confluence', 'kundenhistorie', 'teams'],
   },
   {
     id: 'consulting',
     name: 'Consulting-Team',
     desc: 'Tagessätze, Kundenanpassungen und Termine im Beratungsalltag',
-    widgets: ['vertragsuebersicht', 'confluence', 'aktivitaeten', 'tickets', 'teams'],
+    widgets: ['kundentickets', 'vertragsuebersicht', 'confluence', 'aktivitaeten', 'tickets', 'teams'],
   },
 ]
 
@@ -209,7 +218,7 @@ function App() {
   }
 
   function sizeOf(id: string): WidgetSize {
-    const stored = sizes[roleId]?.[id]
+    const stored = sizes[roleId]?.[id] ?? CATALOG.find((entry) => entry.id === id)?.defaultSize
     return { cols: stored?.cols === 2 ? 2 : 1, rows: stored?.rows === 2 ? 2 : 1 }
   }
 

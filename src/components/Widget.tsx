@@ -237,10 +237,12 @@ interface RowProps {
   meta?: ReactNode
   tags?: ReactNode
   aside?: ReactNode
+  /** Zusatzinhalt unter Meta und Tags, z. B. eine aufgeklappte Beschreibung */
+  details?: ReactNode
 }
 
 /** Listeneintrag; die Dringlichkeit färbt die linke Kante und hebt kritische Einträge hervor. */
-export function Row({ urgency = 'normal', title, href, meta, tags, aside }: RowProps) {
+export function Row({ urgency = 'normal', title, href, meta, tags, aside, details }: RowProps) {
   return (
     <li className={`row row--${urgency}`}>
       <div className="row-main">
@@ -255,6 +257,7 @@ export function Row({ urgency = 'normal', title, href, meta, tags, aside }: RowP
         </div>
         {meta && <div className="row-meta">{meta}</div>}
         {tags && <div className="row-tags">{tags}</div>}
+        {details}
       </div>
       {aside && <div className="row-aside">{aside}</div>}
     </li>
