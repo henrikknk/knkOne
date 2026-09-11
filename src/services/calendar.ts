@@ -28,6 +28,7 @@ interface OutlookCalendar {
   id: string
   name: string
   ownerAddress: string
+  isDefaultCalendar: boolean
 }
 
 // CalendarGetTables_V2 ist im generierten Service nur als Record<string, unknown> typisiert.
@@ -35,13 +36,14 @@ function parseCalendars(data: Record<string, unknown> | undefined): OutlookCalen
   const value = data?.value
   if (!Array.isArray(value)) return []
   return value.flatMap((item) => {
-    const calendar = item as { id?: unknown; name?: unknown; owner?: { address?: unknown } }
+    const calendar = item as { id?: unknown; name?: unknown; owner?: { address?: unknown }; isDefaultCalendar?: unknown }
     if (typeof calendar.id !== 'string') return []
     return [
       {
         id: calendar.id,
         name: typeof calendar.name === 'string' ? calendar.name : '',
         ownerAddress: typeof calendar.owner?.address === 'string' ? calendar.owner.address.toLowerCase() : '',
+        isDefaultCalendar: calendar.isDefaultCalendar === true,
       },
     ]
   })
@@ -50,13 +52,24 @@ function parseCalendars(data: Record<string, unknown> | undefined): OutlookCalen
 const DEFAULT_CALENDAR_NAMES = ['kalender', 'calendar']
 
 // Die Kalenderliste enthält auch Kalender, die andere Personen freigegeben haben - nur eigene zulassen.
+// "isDefaultCalendar" kommt laut Graph-API nur für den eigenen Kalender des aufrufenden Benutzers zurück und ist
+// damit unabhängig von UPN/Postfach-Abweichungen der zuverlässigste Treffer.
 // Die Postfachadresse kann in einer anderen Domain liegen als der UPN, daher notfalls über den Teil vor dem @ vergleichen.
 function pickOwnCalendar(calendars: OutlookCalendar[], userPrincipalName: string): OutlookCalendar | undefined {
+  const byDefault = calendars.find((calendar) => calendar.isDefaultCalendar)
+  if (byDefault) return byDefault
+
   const upn = userPrincipalName.toLowerCase()
   const localPart = upn.split('@')[0]
   let own = calendars.filter((calendar) => calendar.ownerAddress === upn)
   if (own.length === 0 && localPart) own = calendars.filter((calendar) => calendar.ownerAddress.split('@')[0] === localPart)
-  return own.find((calendar) => DEFAULT_CALENDAR_NAMES.includes(calendar.name.toLowerCase())) ?? own[0]
+  if (own.length > 0) return own.find((calendar) => DEFAULT_CALENDAR_NAMES.includes(calendar.name.toLowerCase())) ?? own[0]
+
+  // Letzter Ausweg: nur ein Kalender ohne erkennbaren fremden Owner - dann ist es vermutlich der eigene.
+  const noOwnerListed = calendars.filter((calendar) => !calendar.ownerAddress)
+  if (calendars.length === 1) return calendars[0]
+  if (noOwnerListed.length === 1) return noOwnerListed[0]
+  return undefined
 }
 
 let calendarIdPromise: Promise<string> | null = null
@@ -67,8 +80,19 @@ async function resolveOwnCalendarId(): Promise<string> {
   if (!tables.success) throw new Error(tables.error?.message || 'Kalenderliste konnte nicht geladen werden')
   const userPrincipalName = context.user.userPrincipalName
   if (!userPrincipalName) throw new Error('Kein angemeldeter Benutzer im App-Kontext gefunden')
-  const calendar = pickOwnCalendar(parseCalendars(tables.data), userPrincipalName)
-  if (!calendar) throw new Error('Kein eigener Kalender des angemeldeten Benutzers gefunden')
+  const calendars = parseCalendars(tables.data)
+  const calendar = pickOwnCalendar(calendars, userPrincipalName)
+  if (!calendar) {
+    // Diagnosehinweis statt stummem Fehlschlag: hilft zu unterscheiden zwischen "keine Verbindung"
+    // (0 Kalender) und "Verbindung ok, aber Adressabgleich schlägt fehl" (>0 Kalender).
+    console.error('[calendar] Kein eigener Kalender gefunden', {
+      userPrincipalName,
+      calendarCount: calendars.length,
+      ownerAddresses: calendars.map((calendar) => calendar.ownerAddress),
+    })
+    const detail = calendars.length === 0 ? 'keine Kalender von der Verbindung geliefert' : `${calendars.length} Kalender gefunden, keiner passt zu ${userPrincipalName}`
+    throw new Error(`Kein eigener Kalender des angemeldeten Benutzers gefunden (${detail})`)
+  }
   return calendar.id
 }
 
@@ -152,3 +176,4 @@ export async function loadEventsInRange(from: Date, to: Date): Promise<CalendarE
   }
   return [...rows.values()].sort((a, b) => a.start.getTime() - b.start.getTime())
 }
+ 

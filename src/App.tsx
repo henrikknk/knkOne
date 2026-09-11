@@ -1,6 +1,17 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import './App.css'
 import knkLogo from './assets/knk-logo.jpg'
+// Logos der Anwendungen (Icons der Power-Platform-Connectoren); ohne eigene Anwendung ein passendes Symbol.
+import businessCentralIcon from './assets/sources/business-central.png'
+import confluenceIcon from './assets/sources/confluence.png'
+import copilotStudioIcon from './assets/sources/copilot-studio.png'
+import dynamicsIcon from './assets/sources/dynamics-365.png'
+import jiraIcon from './assets/sources/jira.png'
+import outlookIcon from './assets/sources/outlook.png'
+import signalsIcon from './assets/sources/signals.svg'
+import teamsIcon from './assets/sources/teams.png'
+import todoIcon from './assets/sources/todo.png'
+import workloadIcon from './assets/sources/workload.svg'
 import GlobalSearch from './components/GlobalSearch'
 import { useTheme, type Theme } from './hooks/useTheme'
 import type { WidgetDef, WidgetProps, WidgetSize } from './components/widgetTypes'
@@ -31,17 +42,18 @@ type CatalogEntry = WidgetDef & {
 }
 
 const SOURCES = {
-  dynamics: { source: 'Dynamics 365', sourceShort: 'D365', color: '#004576' },
-  jira: { source: 'Jira', sourceShort: 'JIRA', color: '#0C66E4' },
-  todo: { source: 'To-Do & Planner', sourceShort: 'TODO', color: '#2564CF' },
-  outlook: { source: 'Outlook', sourceShort: 'OL', color: '#0F6CBD' },
-  web: { source: 'Perplexity', sourceShort: 'WEB', color: '#1F7A8C' },
-  confluence: { source: 'Confluence', sourceShort: 'CNF', color: '#1868DB' },
-  nav: { source: 'NAV / Datasets', sourceShort: 'NAV', color: '#107C10' },
-  teams: { source: 'Microsoft Teams', sourceShort: 'TMS', color: '#5B5FC7' },
-  combined: { source: 'Jira · Dynamics 365 · To-Do · Planner', sourceShort: 'ALLE', color: '#004576' },
-  erp: { source: 'Business Central', sourceShort: 'BC', color: '#00807F' },
-  copilot: { source: 'Copilot Studio', sourceShort: 'CPS', color: '#0F7B6C' },
+  dynamics: { source: 'Dynamics 365', icon: dynamicsIcon, color: '#004576' },
+  jira: { source: 'Jira', icon: jiraIcon, color: '#0C66E4' },
+  todo: { source: 'To-Do & Planner', icon: todoIcon, color: '#2564CF' },
+  outlook: { source: 'Outlook', icon: outlookIcon, color: '#0F6CBD' },
+  web: { source: 'Perplexity', icon: signalsIcon, color: '#1F7A8C' },
+  confluence: { source: 'Confluence', icon: confluenceIcon, color: '#1868DB' },
+  // Für NAV gibt es kein eigenes Connector-Logo mehr - Business Central ist der Nachfolger.
+  nav: { source: 'NAV / Datasets', icon: businessCentralIcon, color: '#107C10' },
+  teams: { source: 'Microsoft Teams', icon: teamsIcon, color: '#5B5FC7' },
+  combined: { source: 'Jira · Dynamics 365 · To-Do · Planner', icon: workloadIcon, color: '#004576' },
+  erp: { source: 'Business Central', icon: businessCentralIcon, color: '#00807F' },
+  copilot: { source: 'Copilot Studio', icon: copilotStudioIcon, color: '#0F7B6C' },
 } satisfies Record<string, Omit<WidgetDef, 'id' | 'title'>>
 
 const CATALOG: CatalogEntry[] = [
@@ -387,9 +399,7 @@ function App() {
                 const added = widgetIds.includes(entry.id)
                 return (
                   <button key={entry.id} type="button" className="catalog-item" disabled={added} onClick={() => addWidget(entry.id)}>
-                    <span className="widget-source" style={{ '--source-color': entry.color } as CSSProperties} aria-hidden="true">
-                      {entry.sourceShort}
-                    </span>
+                    <img className="widget-source" src={entry.icon} alt="" />
                     <span className="catalog-text">
                       <b>{entry.title}</b>
                       <span>{entry.source}</span>

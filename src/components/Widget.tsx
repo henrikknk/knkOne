@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import type { PagedList } from '../hooks/usePagedList'
 import type { Urgency } from '../lib/format'
 import type { Tone, WidgetProps, WidgetSize, WidgetSpan } from './widgetTypes'
@@ -138,9 +138,7 @@ export function WidgetFrame({
             </svg>
           </span>
         )}
-        <span className="widget-source" style={{ '--source-color': widget.color } as CSSProperties} aria-hidden="true">
-          {widget.sourceShort}
-        </span>
+        <img className="widget-source" src={widget.icon} alt="" title={widget.source} />
         <div className="widget-titles">
           <h2 id={titleId} className="widget-title">
             {widget.title}

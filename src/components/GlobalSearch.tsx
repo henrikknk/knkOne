@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react'
 import { errorMessage } from '../lib/format'
 import { loadSearchSource, SEARCH_SOURCES, searchRecords, searchTerms, type SearchRecord } from '../services/search'
 import type { WidgetDef } from './widgetTypes'
@@ -152,9 +152,7 @@ export default function GlobalSearch({ widgets }: { widgets: WidgetDef[] }) {
                 <div key={group.source.id} role="group" aria-label={group.source.label} className="search-group">
                   <div className="search-group-head" aria-hidden="true">
                     {group.widget && (
-                      <span className="widget-source" style={{ '--source-color': group.widget.color } as CSSProperties}>
-                        {group.widget.sourceShort}
-                      </span>
+                      <img className="widget-source" src={group.widget.icon} alt="" />
                     )}
                     <span>{group.source.label}</span>
                     <span className="search-group-count">{group.matches.length}</span>

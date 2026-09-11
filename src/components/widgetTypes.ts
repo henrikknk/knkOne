@@ -4,8 +4,8 @@ export interface WidgetDef {
   id: string
   title: string
   source: string
-  /** Kurzzeichen der Quelle im Widget-Kopf */
-  sourceShort: string
+  /** Logo der Anwendung bzw. passendes Symbol im Widget-Kopf (Bild-URL) */
+  icon: string
   /** Erkennungsfarbe der Quelle */
   color: string
 }
