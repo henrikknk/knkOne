@@ -1,20 +1,30 @@
-import { useMemo, useState } from 'react'
-import { Row, WidgetEmpty, WidgetFrame, WidgetNotice, WidgetSkeleton } from '../components/Widget'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { LoadMore, Row, WidgetEmpty, WidgetFrame, WidgetNotice, WidgetSkeleton } from '../components/Widget'
 import type { WidgetProps } from '../components/widgetTypes'
-import { useAsyncData } from '../hooks/useAsyncData'
-import { formatDate } from '../lib/format'
-import { loadConfluencePageIndex, type ConfluencePage } from '../services/confluence'
+import { errorMessage, formatDate } from '../lib/format'
+import {
+  ensureConfluencePageIndex,
+  getConfluenceIndexState,
+  reloadConfluencePageIndex,
+  subscribeConfluenceIndex,
+} from '../services/confluence'
 import { normalizeSearchText, searchTerms } from '../services/search'
 
-const MAX_RESULTS = 50
-const NO_PAGES: ConfluencePage[] = []
+const RESULT_BATCH = 50
 
 function ConfluenceSearch() {
-  const index = useAsyncData(loadConfluencePageIndex)
+  const state = useSyncExternalStore(subscribeConfluenceIndex, getConfluenceIndexState)
   const [query, setQuery] = useState('')
-  const pages = index.status === 'ready' ? index.data.pages : NO_PAGES
+  // Treffer erscheinen stapelweise; ein neuer Suchbegriff beginnt wieder beim ersten Stapel.
+  const [shown, setShown] = useState({ query: '', count: RESULT_BATCH })
+  const { pages, spaceCount, loadedSpaces, failedSpaces } = state.index
+  const loading = state.status === 'idle' || state.status === 'loading'
 
-  // Normalisierte Texte einmal je Ladevorgang statt bei jedem Tastendruck.
+  useEffect(() => {
+    ensureConfluencePageIndex()
+  }, [])
+
+  // Normalisierte Texte einmal je geladenem Stapel statt bei jedem Tastendruck.
   const searchable = useMemo(
     () => pages.map((page) => ({ page, title: normalizeSearchText(page.title), all: normalizeSearchText(`${page.title} ${page.spaceName} ${page.text}`) })),
     [pages],
@@ -24,31 +34,39 @@ function ConfluenceSearch() {
   const matches = searchable.filter((entry) => terms.length > 0 && terms.every((term) => entry.all.includes(term)))
   const inTitle = (entry: (typeof searchable)[number]) => terms.every((term) => entry.title.includes(term))
   const ranked = [...matches.filter(inTitle), ...matches.filter((entry) => !inTitle(entry))].map((entry) => entry.page)
+  const visibleCount = shown.query === query ? shown.count : RESULT_BATCH
+  const progress = loading && spaceCount > 0 ? ` · lädt weitere Bereiche (${loadedSpaces} von ${spaceCount}) …` : ''
 
   let content
-  if (index.status === 'loading') {
+  if (state.status === 'error') {
+    content = <WidgetNotice kind="offline" text={errorMessage(state.error, 'Confluence ist nicht erreichbar.')} onRetry={reloadConfluencePageIndex} />
+  } else if (loading && pages.length === 0) {
     content = <WidgetSkeleton />
-  } else if (index.status === 'error') {
-    content = <WidgetNotice kind="offline" text={index.error} onRetry={index.reload} />
   } else if (terms.length === 0) {
-    const { spaceCount, failedSpaces } = index.data
     const scope = pages.some((page) => page.text) ? 'Titel und Inhalte' : 'Titel'
     content = (
       <p className="widget-hint">
-        Durchsucht die {scope} von {pages.length} Seiten aus {spaceCount} Bereichen
+        Durchsucht die {scope} von {pages.length} Seiten aus {loading ? loadedSpaces : spaceCount} Bereichen
+        {progress}
         {failedSpaces > 0 ? ` · ${failedSpaces} Bereiche nicht erreichbar` : ''}
       </p>
     )
   } else if (ranked.length === 0) {
-    content = <WidgetEmpty text={`Keine Seiten zu „${query.trim()}“ gefunden`} />
+    content = loading ? (
+      <p className="widget-hint">
+        Noch keine Seiten zu „{query.trim()}“{progress}
+      </p>
+    ) : (
+      <WidgetEmpty text={`Keine Seiten zu „${query.trim()}“ gefunden`} />
+    )
   } else {
     content = (
       <>
         <p className="widget-hint">
-          {ranked.length} Treffer{ranked.length > MAX_RESULTS ? `, die ersten ${MAX_RESULTS} werden angezeigt` : ''}
+          {ranked.length} Treffer{progress}
         </p>
         <ul className="rows">
-          {ranked.slice(0, MAX_RESULTS).map((page) => (
+          {ranked.slice(0, visibleCount).map((page) => (
             <Row
               key={page.id}
               title={
@@ -60,6 +78,13 @@ function ConfluenceSearch() {
             />
           ))}
         </ul>
+        <LoadMore
+          list={{
+            hasMore: ranked.length > visibleCount,
+            loadingMore: false,
+            loadMore: () => setShown({ query, count: visibleCount + RESULT_BATCH }),
+          }}
+        />
       </>
     )
   }
@@ -80,7 +105,7 @@ function ConfluenceSearch() {
   )
 }
 
-// Live-Widget: Suche über die Confluence-Seiten aller Bereiche.
+// Live-Widget: Suche über die Confluence-Seiten aller Bereiche; die Bereiche werden stapelweise geladen.
 export default function ConfluenceWidget(props: WidgetProps) {
   return (
     <WidgetFrame {...props}>

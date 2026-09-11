@@ -24,8 +24,16 @@ export interface ConfluencePage {
 export interface ConfluencePageIndex {
   pages: ConfluencePage[]
   spaceCount: number
+  /** Bereiche, die bereits abgefragt wurden - erfolgreich oder nicht */
+  loadedSpaces: number
   failedSpaces: number
 }
+
+export type ConfluenceIndexState =
+  | { status: 'idle'; index: ConfluencePageIndex }
+  | { status: 'loading'; index: ConfluencePageIndex }
+  | { status: 'ready'; index: ConfluencePageIndex; loadedAt: number }
+  | { status: 'error'; index: ConfluencePageIndex; error: unknown }
 
 // Laut Modell liegt die Liste unter „value“, die Confluence-API selbst nennt sie „results“ - beides annehmen.
 function entries(response: unknown): unknown[] {
@@ -71,14 +79,6 @@ function toPage(entry: unknown, spaceName: string): ConfluencePage[] {
   ]
 }
 
-async function inBatches<T, R>(items: T[], size: number, task: (item: T) => Promise<R>): Promise<Array<PromiseSettledResult<R>>> {
-  const results: Array<PromiseSettledResult<R>> = []
-  for (let start = 0; start < items.length; start += size) {
-    results.push(...(await Promise.allSettled(items.slice(start, start + size).map(task))))
-  }
-  return results
-}
-
 const confluenceSpaces = sharedRequest(async () => {
   const response = await runConnector('Confluence: GetSpaces', () => ConfluenceService.GetSpaces(CLOUD_ID))
   return entries(response).flatMap((entry) => {
@@ -88,28 +88,77 @@ const confluenceSpaces = sharedRequest(async () => {
   })
 }, 10 * 60_000)
 
-/**
- * Seiten aller Bereiche für die Suche, einige Minuten zwischengespeichert.
- * Der Connector blättert nicht - je Bereich kommt nur die erste Ergebnisseite der Confluence-API.
- */
-export const loadConfluencePageIndex = sharedRequest(async (): Promise<ConfluencePageIndex> => {
+const INDEX_TTL_MS = 5 * 60_000
+const EMPTY_INDEX: ConfluencePageIndex = { pages: [], spaceCount: 0, loadedSpaces: 0, failedSpaces: 0 }
+
+// Der Seitenindex lebt außerhalb der Widgets: jeder geladene Stapel ist sofort durchsuchbar, und nach einem
+// Rollenwechsel lädt es weiter bzw. bleibt einige Minuten zwischengespeichert.
+let indexState: ConfluenceIndexState = { status: 'idle', index: EMPTY_INDEX }
+/** Zählt Ladevorgänge hoch, damit ein verworfener Vorgang den neueren nicht überschreibt. */
+let indexRun = 0
+const indexListeners = new Set<() => void>()
+
+function setIndexState(next: ConfluenceIndexState) {
+  indexState = next
+  indexListeners.forEach((listener) => listener())
+}
+
+export function subscribeConfluenceIndex(listener: () => void) {
+  indexListeners.add(listener)
+  return () => {
+    indexListeners.delete(listener)
+  }
+}
+
+export function getConfluenceIndexState(): ConfluenceIndexState {
+  return indexState
+}
+
+function toIndex(pages: Map<string, ConfluencePage>, spaceCount: number, loadedSpaces: number, failedSpaces: number): ConfluencePageIndex {
+  return { pages: [...pages.values()].sort((a, b) => a.title.localeCompare(b.title, 'de')), spaceCount, loadedSpaces, failedSpaces }
+}
+
+/** Der Connector blättert nicht - je Bereich kommt nur die erste Ergebnisseite der Confluence-API. */
+async function loadIndex(run: number) {
   const spaces = await confluenceSpaces()
-  const results = await inBatches(spaces, SPACE_BATCH_SIZE, async (space) => {
-    const response = await runConnector(`Confluence: GetPagesBySpace (${space.name})`, () => ConfluenceService.GetPagesBySpace(CLOUD_ID, space.id))
-    return entries(response).flatMap((entry) => toPage(entry, space.name))
-  })
-
-  const failures = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected')
-  if (spaces.length > 0 && failures.length === results.length) throw failures[0].reason
-  if (failures.length > 0) console.error('Confluence: einzelne Bereiche konnten nicht geladen werden', failures)
-
+  if (run !== indexRun) return
   const pages = new Map<string, ConfluencePage>()
-  for (const result of results) {
-    if (result.status === 'fulfilled') for (const page of result.value) pages.set(page.id, page)
+  const failures: unknown[] = []
+  setIndexState({ status: 'loading', index: toIndex(pages, spaces.length, 0, 0) })
+
+  for (let start = 0; start < spaces.length; start += SPACE_BATCH_SIZE) {
+    const batch = spaces.slice(start, start + SPACE_BATCH_SIZE)
+    const results = await Promise.allSettled(
+      batch.map(async (space) => {
+        const response = await runConnector(`Confluence: GetPagesBySpace (${space.name})`, () => ConfluenceService.GetPagesBySpace(CLOUD_ID, space.id))
+        return entries(response).flatMap((entry) => toPage(entry, space.name))
+      }),
+    )
+    if (run !== indexRun) return
+    for (const result of results) {
+      if (result.status === 'fulfilled') for (const page of result.value) pages.set(page.id, page)
+      else failures.push(result.reason)
+    }
+    setIndexState({ status: 'loading', index: toIndex(pages, spaces.length, start + batch.length, failures.length) })
   }
-  return {
-    pages: [...pages.values()].sort((a, b) => a.title.localeCompare(b.title, 'de')),
-    spaceCount: spaces.length,
-    failedSpaces: failures.length,
-  }
-}, 5 * 60_000)
+
+  if (spaces.length > 0 && failures.length === spaces.length) throw failures[0]
+  if (failures.length > 0) console.error('Confluence: einzelne Bereiche konnten nicht geladen werden', failures)
+  setIndexState({ status: 'ready', index: toIndex(pages, spaces.length, spaces.length, failures.length), loadedAt: Date.now() })
+}
+
+/** Lädt die Seiten aller Bereiche neu, stapelweise zu je SPACE_BATCH_SIZE Bereichen. */
+export function reloadConfluencePageIndex() {
+  const run = ++indexRun
+  setIndexState({ status: 'loading', index: EMPTY_INDEX })
+  loadIndex(run).catch((error: unknown) => {
+    if (run === indexRun) setIndexState({ status: 'error', index: indexState.index, error })
+  })
+}
+
+/** Startet das Laden, sofern nicht schon ein Ladevorgang läuft oder ein frischer Stand vorliegt. */
+export function ensureConfluencePageIndex() {
+  if (indexState.status === 'loading') return
+  if (indexState.status === 'ready' && Date.now() - indexState.loadedAt < INDEX_TTL_MS) return
+  reloadConfluencePageIndex()
+}

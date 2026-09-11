@@ -5,13 +5,6 @@
  */
 
 export const dataSourcesInfo = {
-  "activitypointers": {
-    "tableId": "",
-    "version": "",
-    "primaryKey": "activityid",
-    "dataSourceType": "Dataverse",
-    "apis": {}
-  },
   "confluence": {
     "tableId": "",
     "version": "",
@@ -129,6 +122,55 @@ export const dataSourcesInfo = {
         }
       }
     }
+  },
+  "activitypointers": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "activityid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "leads": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "leadid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "opportunities": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "opportunityid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "systemusers": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "systemuserid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "knk_contracttypes": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "knk_contracttypeid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "knk_subscriptionservices": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "knk_subscriptionserviceid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
+  },
+  "knk_subscriptions": {
+    "tableId": "",
+    "version": "",
+    "primaryKey": "knk_subscriptionid",
+    "dataSourceType": "Dataverse",
+    "apis": {}
   },
   "jira": {
     "tableId": "",
@@ -566,8 +608,7 @@ export const dataSourcesInfo = {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -605,8 +646,7 @@ export const dataSourcesInfo = {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -1782,33 +1822,1189 @@ export const dataSourcesInfo = {
       }
     }
   },
-  "knk_contracttypes": {
+  "microsoftcopilotstudio": {
     "tableId": "",
     "version": "",
-    "primaryKey": "knk_contracttypeid",
-    "dataSourceType": "Dataverse",
-    "apis": {}
-  },
-  "knk_subscriptions": {
-    "tableId": "",
-    "version": "",
-    "primaryKey": "knk_subscriptionid",
-    "dataSourceType": "Dataverse",
-    "apis": {}
-  },
-  "knk_subscriptionservices": {
-    "tableId": "",
-    "version": "",
-    "primaryKey": "knk_subscriptionserviceid",
-    "dataSourceType": "Dataverse",
-    "apis": {}
-  },
-  "leads": {
-    "tableId": "",
-    "version": "",
-    "primaryKey": "leadid",
-    "dataSourceType": "Dataverse",
-    "apis": {}
+    "primaryKey": "",
+    "dataSourceType": "Connector",
+    "apis": {
+      "ExecuteCopilotAsyncV2": {
+        "path": "/{connectionId}/powervirtualagents/dataverse-backed/authenticated/bots/{Copilot}/proactivecopilot/executeAsyncV2",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "x-ms-conversation-id",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "201": {
+            "type": "void"
+          },
+          "default": {
+            "type": "object"
+          }
+        }
+      },
+      "ExecuteCopilotAsync": {
+        "path": "/{connectionId}/powervirtualagents/dataverse-backed/authenticated/bots/{Copilot}/proactivecopilot/executeAsync",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "x-ms-conversation-id",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "ExecuteCopilot": {
+        "path": "/{connectionId}/powervirtualagents/dataverse-backed/authenticated/bots/{Copilot}/proactivecopilot/execute",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "x-ms-conversation-id",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "ListCopilots": {
+        "path": "/{connectionId}/powervirtualagents/dataverse-backed/copilots",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "ExecuteDataverseCopilotToStart": {
+        "path": "/{connectionId}/powervirtualagents/dataverse-backed/authenticated/bots/{Copilot}/conversations/{ConversationId}",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "ContinueExecuteDataverseCopilot": {
+        "path": "/{connectionId}/powervirtualagents/dataverse-backed/authenticated/bots/{Copilot}/conversations/{ConversationId}/continue",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "ContinueExecuteDataverseCopilotOnAgenticRuntime": {
+        "path": "/{connectionId}/copilotstudio/agenticruntime/dataverse-backed/authenticated/bots/{Copilot}/conversations/{ConversationId}/continue",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "ExecuteFirstPartyCopilot": {
+        "path": "/{connectionId}/powervirtualagents/prebuilt/authenticated/bots/{Copilot}/conversations/{ConversationId}/execute/trigger/{TriggerId}",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "TriggerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "ExecuteFirstPartyCopilotToStart": {
+        "path": "/{connectionId}/powervirtualagents/prebuilt/authenticated/bots/{Copilot}/conversations/{ConversationId}",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "ContinueExecuteFirstPartyCopilot": {
+        "path": "/{connectionId}/powervirtualagents/prebuilt/authenticated/bots/{Copilot}/conversations/{ConversationId}/continue",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "InvokeConnectorCallback": {
+        "path": "/{connectionId}/powervirtualagents/bots/{Copilot}/channels/{channelId}/user-triggers/users/{userId}/triggers/{triggerId}",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "triggerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "conversationId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "InvokeTriggerOnAgenticRuntime": {
+        "path": "/{connectionId}/copilotstudio/agenticruntime/bots/{Copilot}/triggers/{triggerId}/invoke",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "triggerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-cds-bot-id",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-workflow-resourcegroup-name",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-workflow-name",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-trigger-connection-mode",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-trigger-purpose",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-trigger-component-schema-name",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-trigger-component-version",
+            "in": "header",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "x-ms-trigger-bot-version",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inputs",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          },
+          {
+            "name": "conversationId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-pva-bot-id",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "InvokeTrigger": {
+        "path": "/{connectionId}/powervirtualagents/bots/{Copilot}/triggers/{triggerId}/invoke",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Copilot",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "triggerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-cds-bot-id",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-workflow-resourcegroup-name",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-workflow-name",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-trigger-connection-mode",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-trigger-purpose",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-trigger-component-schema-name",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-trigger-component-version",
+            "in": "header",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "x-ms-trigger-bot-version",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "inputs",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          },
+          {
+            "name": "conversationId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "x-ms-pva-bot-id",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "EvaluationTestStartNewConversation": {
+        "path": "/{connectionId}/powervirtualagents/evaluation-test/authenticated/bots/{CdsBotId}/conversations",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "CdsBotId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "EvaluationTestExecuteTurn": {
+        "path": "/{connectionId}/powervirtualagents/evaluation-test/authenticated/bots/{CdsBotId}/conversations/{ConversationId}",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "CdsBotId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "EvaluationTestContinueTurn": {
+        "path": "/{connectionId}/powervirtualagents/evaluation-test/authenticated/bots/{CdsBotId}/conversations/{ConversationId}/continue",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "CdsBotId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "EvaluationTestStartNewConversationOnAgenticRuntime": {
+        "path": "/{connectionId}/copilotstudio/agenticruntime/evaluation-test/authenticated/bots/{CdsBotId}/conversations",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "CdsBotId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "EvaluationTestExecuteTurnOnAgenticRuntime": {
+        "path": "/{connectionId}/copilotstudio/agenticruntime/evaluation-test/authenticated/bots/{CdsBotId}/conversations/{ConversationId}",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "CdsBotId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "EvaluationTestContinueTurnOnAgenticRuntime": {
+        "path": "/{connectionId}/copilotstudio/agenticruntime/evaluation-test/authenticated/bots/{CdsBotId}/conversations/{ConversationId}/continue",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "CdsBotId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "DeclarativeAgentEvaluationTestStartNewConversation": {
+        "path": "/{connectionId}/powervirtualagents/evaluation-test/authenticated/declarative-bots/{CdsBotId}/conversations",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "CdsBotId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "DeclarativeAgentEvaluationTestExecuteTurn": {
+        "path": "/{connectionId}/powervirtualagents/evaluation-test/authenticated/declarative-bots/{CdsBotId}/conversations/{ConversationId}",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "CdsBotId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "ConversationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "void"
+          }
+        }
+      },
+      "BindUserConnections": {
+        "path": "/{connectionId}/powervirtualagents/bots/{botSchemaName}/channels/{channelId}/user-connections",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "botSchemaName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "stateId",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "type": "object"
+          }
+        ],
+        "responseInfo": {
+          "204": {
+            "type": "void"
+          }
+        }
+      },
+      "RunAgentMakerEvaluationTestSet": {
+        "path": "/{connectionId}/copilotstudio/bots/{Agent}/api/makerevaluation/testsets/{TestSetId}/run",
+        "method": "POST",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Agent",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "TestSetId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "type": "object"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "202": {
+            "type": "object"
+          }
+        }
+      },
+      "GetAgentMakerEvaluationTestSets": {
+        "path": "/{connectionId}/copilotstudio/bots/{Agent}/api/makerevaluation/testsets",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Agent",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "GetAgentMakerEvaluationTestSetDetails": {
+        "path": "/{connectionId}/copilotstudio/bots/{Agent}/api/makerevaluation/testsets/{TestSetId}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Agent",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "TestSetId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "GetAgentMakerEvaluationTestRuns": {
+        "path": "/{connectionId}/copilotstudio/bots/{Agent}/api/makerevaluation/testruns",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Agent",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      },
+      "GetAgentMakerEvaluationTestRunDetails": {
+        "path": "/{connectionId}/copilotstudio/bots/{Agent}/api/makerevaluation/testruns/{EvaluationRunId}",
+        "method": "GET",
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Agent",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "EvaluationRunId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "environmentId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responseInfo": {
+          "200": {
+            "type": "object"
+          }
+        }
+      }
+    }
   },
   "office365": {
     "tableId": "",
@@ -1836,8 +3032,7 @@ export const dataSourcesInfo = {
             "name": "lookAheadTimeInMinutes",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -1884,8 +3079,7 @@ export const dataSourcesInfo = {
             "name": "lookAheadTimeInMinutes",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -1932,8 +3126,7 @@ export const dataSourcesInfo = {
             "name": "lookAheadTimeInMinutes",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -2036,15 +3229,13 @@ export const dataSourcesInfo = {
             "name": "top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -2334,7 +3525,7 @@ export const dataSourcesInfo = {
             "name": "messageIds",
             "in": "body",
             "required": true,
-            "type": "array"
+            "type": "object"
           },
           {
             "name": "categoryName",
@@ -2384,29 +3575,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -2460,8 +3647,7 @@ export const dataSourcesInfo = {
             "name": "top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -2705,29 +3891,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -2781,8 +3963,7 @@ export const dataSourcesInfo = {
             "name": "top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -3191,29 +4372,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -3290,29 +4467,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -3389,29 +4562,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -3488,29 +4657,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -3587,29 +4752,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -3680,29 +4841,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -3773,29 +4930,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -3872,29 +5025,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -3971,29 +5120,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -4070,29 +5215,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -4405,29 +5546,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -4495,29 +5632,25 @@ export const dataSourcesInfo = {
             "name": "to",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "cc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "toOrCc",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "from",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           {
             "name": "importance",
@@ -4605,15 +5738,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -4791,15 +5922,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -4875,15 +6004,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -4959,15 +6086,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -5055,15 +6180,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "search",
@@ -5125,15 +6248,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "search",
@@ -5361,15 +6482,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "x-ms-operation-context",
@@ -5419,15 +6538,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -5471,15 +6588,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "x-ms-operation-context",
@@ -5529,15 +6644,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "x-ms-operation-context",
@@ -5587,15 +6700,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -5639,15 +6750,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -5679,15 +6788,13 @@ export const dataSourcesInfo = {
             "name": "incomingDays",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "pastDays",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -5719,15 +6826,13 @@ export const dataSourcesInfo = {
             "name": "incomingDays",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "pastDays",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -5759,15 +6864,13 @@ export const dataSourcesInfo = {
             "name": "incomingDays",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "pastDays",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -5851,15 +6954,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -6705,15 +7806,13 @@ export const dataSourcesInfo = {
             "name": "skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "orderBy",
@@ -6897,15 +7996,13 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           {
             "name": "$skip",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -6975,8 +8072,7 @@ export const dataSourcesInfo = {
             "name": "body",
             "in": "body",
             "required": true,
-            "type": "string",
-            "format": "binary"
+            "type": "object"
           },
           {
             "name": "Content-Type",
@@ -7020,8 +8116,7 @@ export const dataSourcesInfo = {
             "name": "Body",
             "in": "body",
             "required": false,
-            "type": "string",
-            "format": "binary"
+            "type": "object"
           },
           {
             "name": "ContentType",
@@ -7166,13 +8261,6 @@ export const dataSourcesInfo = {
         }
       }
     }
-  },
-  "opportunities": {
-    "tableId": "",
-    "version": "",
-    "primaryKey": "opportunityid",
-    "dataSourceType": "Dataverse",
-    "apis": {}
   },
   "planner": {
     "tableId": "",
@@ -8167,13 +9255,6 @@ export const dataSourcesInfo = {
       }
     }
   },
-  "systemusers": {
-    "tableId": "",
-    "version": "",
-    "primaryKey": "systemuserid",
-    "dataSourceType": "Dataverse",
-    "apis": {}
-  },
   "todo": {
     "tableId": "",
     "version": "",
@@ -8395,8 +9476,7 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -8610,8 +9690,7 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {
@@ -8634,8 +9713,7 @@ export const dataSourcesInfo = {
             "name": "$top",
             "in": "query",
             "required": false,
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         ],
         "responseInfo": {

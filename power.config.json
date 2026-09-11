@@ -53,6 +53,15 @@
       "authenticationType": "OAuth",
       "sharedConnectionId": "/providers/Microsoft.PowerApps/apis/shared_confluence/connections/d9d41e00e76f477d9f72d5b3dbb766b8",
       "dataSets": {}
+    },
+    "2939d474-bd25-4d69-b297-7724dd488d41": {
+      "id": "/providers/Microsoft.PowerApps/apis/shared_microsoftcopilotstudio",
+      "displayName": "Microsoft Copilot Studio",
+      "dataSources": [
+        "microsoftcopilotstudio"
+      ],
+      "authenticationType": "oauthDefault",
+      "dataSets": {}
     }
   },
   "databaseReferences": {

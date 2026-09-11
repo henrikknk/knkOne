@@ -10,6 +10,7 @@ import ConfluenceWidget from './widgets/ConfluenceWidget'
 import KundensignaleWidget from './widgets/KundensignaleWidget'
 import KundenticketsWidget from './widgets/KundenticketsWidget'
 import OfflineWidget from './widgets/OfflineWidget'
+import PowerPilotWidget from './widgets/PowerPilotWidget'
 import ProjektbudgetsWidget from './widgets/ProjektbudgetsWidget'
 import TermineWidget from './widgets/TermineWidget'
 import TicketsWidget from './widgets/TicketsWidget'
@@ -40,6 +41,7 @@ const SOURCES = {
   teams: { source: 'Microsoft Teams', sourceShort: 'TMS', color: '#5B5FC7' },
   combined: { source: 'Jira · Dynamics 365 · To-Do · Planner', sourceShort: 'ALLE', color: '#004576' },
   erp: { source: 'Business Central', sourceShort: 'BC', color: '#00807F' },
+  copilot: { source: 'Copilot Studio', sourceShort: 'CPS', color: '#0F7B6C' },
 } satisfies Record<string, Omit<WidgetDef, 'id' | 'title'>>
 
 const CATALOG: CatalogEntry[] = [
@@ -56,6 +58,7 @@ const CATALOG: CatalogEntry[] = [
   { id: 'kundenhistorie', title: 'Kundenhistorie', ...SOURCES.dynamics, component: OfflineWidget },
   { id: 'umsaetze', title: 'Umsätze', ...SOURCES.nav, component: OfflineWidget },
   { id: 'confluence', title: 'Confluence', ...SOURCES.confluence, component: ConfluenceWidget },
+  { id: 'powerpilot', title: 'PowerPilot', ...SOURCES.copilot, defaultSize: { cols: 1, rows: 2 }, component: PowerPilotWidget },
   { id: 'teams', title: 'Teams-Aktivität', ...SOURCES.teams, component: OfflineWidget },
 ]
 
