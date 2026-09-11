@@ -6,14 +6,16 @@ import { useAsyncData } from '../hooks/useAsyncData'
 import { pagesFromAll, usePagedList } from '../hooks/usePagedList'
 import { formatShortDate, startOfDay } from '../lib/chartData'
 import { daysBetween, formatDate, toCalendarDate, type Urgency } from '../lib/format'
-import { listMyPlannerTasks } from '../services/planner'
-import { listMyOpenTodos } from '../services/todo'
+import { loadCrmTaskMatcher, type CrmReference } from '../services/crmTasks'
+import { listMyPlannerTasks, type PlannerTaskRow } from '../services/planner'
+import { listMyOpenTodos, type TodoRow } from '../services/todo'
 
-type TaskTab = 'todo' | 'planner'
+type TaskTab = 'myday' | 'todo' | 'planner'
 
-const TABS: Array<{ id: TaskTab; label: string }> = [
-  { id: 'todo', label: 'Aufgaben' },
-  { id: 'planner', label: 'Mir zugewiesen' },
+const TABS: Array<{ value: TaskTab; label: string }> = [
+  { value: 'myday', label: 'Mein Tag' },
+  { value: 'todo', label: 'Aufgaben' },
+  { value: 'planner', label: 'Mir zugewiesen' },
 ]
 
 interface DueInfo {
@@ -22,17 +24,72 @@ interface DueInfo {
   dueInDays: number | null
 }
 
-function withDueInDays<T extends { dueDate: string | null }>(rows: T[]): Array<T & DueInfo> {
-  const today = new Date()
-  return rows.map((row) => {
-    const due = toCalendarDate(row.dueDate)
-    return { ...row, dueInDays: due ? daysBetween(today, due) : null }
-  })
+type TodoItem = TodoRow &
+  DueInfo & {
+    source: 'todo'
+    /** Tage bis zur Erinnerung, zum Ladezeitpunkt berechnet */
+    reminderInDays: number | null
+    /** CRM-Datensatz, an dem die per Exchange synchronisierte Aufgabe hängt */
+    crm: CrmReference | null
+  }
+type PlannerItem = PlannerTaskRow & DueInfo & { source: 'planner' }
+type TaskItem = TodoItem | PlannerItem
+
+function offsetFromToday(value: string | null) {
+  const date = toCalendarDate(value)
+  return date ? daysBetween(new Date(), date) : null
+}
+
+async function loadTodoItems(): Promise<TodoItem[]> {
+  const [rows, matcher] = await Promise.all([
+    listMyOpenTodos(),
+    // Ohne CRM-Zugriff fehlen nur die Bezüge - die Aufgaben trotzdem anzeigen.
+    loadCrmTaskMatcher().catch((error: unknown) => {
+      console.error('Aufgaben: CRM-Bezüge konnten nicht geladen werden', error)
+      return null
+    }),
+  ])
+  return rows.map((row) => ({
+    ...row,
+    source: 'todo' as const,
+    dueInDays: offsetFromToday(row.dueDate),
+    reminderInDays: offsetFromToday(row.reminder),
+    // Exchange synchronisiert CRM-Aufgaben nur in die Standardliste.
+    crm: matcher && row.defaultList ? matcher(row) : null,
+  }))
+}
+
+async function loadPlannerItems(): Promise<PlannerItem[]> {
+  return (await listMyPlannerTasks()).map((row) => ({ ...row, source: 'planner' as const, dueInDays: offsetFromToday(row.dueDate) }))
+}
+
+// „Mein Tag“ selbst gibt die Schnittstelle nicht her - angenähert wie die Vorschläge in To Do:
+// heute fällig, überfällig oder mit Erinnerung für heute.
+function belongsToMyDay(item: TaskItem) {
+  return (item.dueInDays !== null && item.dueInDays <= 0) || (item.source === 'todo' && item.reminderInDays === 0)
+}
+
+// Überfälliges zuerst (älteste oben), dann heute Fälliges, zuletzt Aufgaben, die nur eine Erinnerung für heute haben.
+function compareMyDay(a: TaskItem, b: TaskItem) {
+  if (a.dueInDays !== null && b.dueInDays !== null) return a.dueInDays - b.dueInDays || a.title.localeCompare(b.title, 'de')
+  if (a.dueInDays !== null) return -1
+  if (b.dueInDays !== null) return 1
+  return a.title.localeCompare(b.title, 'de')
+}
+
+async function loadMyDayItems(): Promise<TaskItem[]> {
+  const [todos, planner] = await Promise.allSettled([loadTodoItems(), loadPlannerItems()])
+  if (todos.status === 'rejected' && planner.status === 'rejected') throw todos.reason
+  if (todos.status === 'rejected') console.error('Mein Tag: To-Do nicht verfügbar', todos.reason)
+  if (planner.status === 'rejected') console.error('Mein Tag: Planner nicht verfügbar', planner.reason)
+  const items: TaskItem[] = [...(todos.status === 'fulfilled' ? todos.value : []), ...(planner.status === 'fulfilled' ? planner.value : [])]
+  return items.filter(belongsToMyDay).sort(compareMyDay)
 }
 
 // Weder To-Do noch Planner können blättern - einmal laden, stapelweise anzeigen.
-const loadTodos = pagesFromAll(async () => withDueInDays(await listMyOpenTodos()), 10)
-const loadPlannerTasks = pagesFromAll(async () => withDueInDays(await listMyPlannerTasks()), 10)
+const loadMyDay = pagesFromAll(loadMyDayItems, 10)
+const loadTodos = pagesFromAll(loadTodoItems, 10)
+const loadPlannerTasks = pagesFromAll(loadPlannerItems, 10)
 
 function dueUrgency(item: DueInfo, important = false): Urgency {
   if (item.dueInDays !== null && item.dueInDays < 0) return 'critical'
@@ -40,11 +97,63 @@ function dueUrgency(item: DueInfo, important = false): Urgency {
   return 'normal'
 }
 
-function DueLabel({ item }: { item: DueInfo }) {
-  if (item.dueInDays === null) return null
+function DueLabel({ item }: { item: TaskItem }) {
+  if (item.dueInDays === null) return item.source === 'todo' && item.reminderInDays === 0 ? <Pill tone="info">Erinnerung heute</Pill> : null
   if (item.dueInDays < 0) return <Pill tone="critical">überfällig · {formatDate(item.dueDate)}</Pill>
   if (item.dueInDays === 0) return <Pill tone="warning">heute fällig</Pill>
   return <Pill tone="neutral">fällig {formatDate(item.dueDate)}</Pill>
+}
+
+function CrmLink({ reference }: { reference: CrmReference }) {
+  const content = (
+    <>
+      <span className="crm-ref-type">{reference.entityLabel}</span>
+      <span className="crm-ref-name">{reference.name}</span>
+    </>
+  )
+  return reference.url ? (
+    <a className="crm-ref" href={reference.url} target="_blank" rel="noopener noreferrer" title={`${reference.entityLabel} im CRM öffnen`}>
+      {content}
+    </a>
+  ) : (
+    <span className="crm-ref">{content}</span>
+  )
+}
+
+/** Eine Aufgabe aus To-Do oder Planner; `showSource` kennzeichnet Planner-Aufgaben in der gemischten Liste „Mein Tag“. */
+function TaskRow({ item, showSource = false }: { item: TaskItem; showSource?: boolean }) {
+  if (item.source === 'planner') {
+    return (
+      <Row
+        urgency={dueUrgency(item)}
+        title={item.title}
+        meta={
+          <>
+            <strong>{item.plan}</strong> · {item.statusLabel}
+          </>
+        }
+        tags={showSource ? <Pill tone="neutral">Mir zugewiesen</Pill> : undefined}
+        aside={<DueLabel item={item} />}
+      />
+    )
+  }
+  const important = item.importance === 'high'
+  return (
+    <Row
+      urgency={dueUrgency(item, important)}
+      title={item.title}
+      meta={`${item.list} · ${item.statusLabel}`}
+      tags={
+        important || item.crm ? (
+          <>
+            {important && <Pill tone="critical">Wichtig</Pill>}
+            {item.crm && <CrmLink reference={item.crm} />}
+          </>
+        ) : undefined
+      }
+      aside={<DueLabel item={item} />}
+    />
+  )
 }
 
 // ---------- Diagramm: offene Aufgaben nach Fälligkeit, relativ zu heute ----------
@@ -228,15 +337,16 @@ function TasksDueChart() {
   )
 }
 
-// Live-Widget: eigene offene To-Do-Aufgaben und mir zugewiesene Planner-Aufgaben, Überfälliges und bald Fälliges zuerst.
+// Live-Widget: „Mein Tag“, eigene offene To-Do-Aufgaben (mit CRM-Bezug) und mir zugewiesene Planner-Aufgaben.
 export default function AktivitaetenWidget(props: WidgetProps) {
-  const [tab, setTab] = useState<TaskTab>('todo')
+  const [tab, setTab] = useState<TaskTab>('myday')
   const [showChart, setShowChart] = useState(false)
-  // Beide Listen laden sofort, damit das Umschalten ohne Wartezeit geht.
+  // Alle Listen laden sofort, damit das Umschalten ohne Wartezeit geht; die Abfragen dahinter werden geteilt.
+  const myDay = usePagedList(loadMyDay)
   const todos = usePagedList(loadTodos)
   const plannerTasks = usePagedList(loadPlannerTasks)
 
-  const active = tab === 'todo' ? todos : plannerTasks
+  const active = tab === 'myday' ? myDay : tab === 'todo' ? todos : plannerTasks
   const overdue = (active.items as DueInfo[]).filter((item) => item.dueInDays !== null && item.dueInDays < 0).length
 
   return (
@@ -244,59 +354,23 @@ export default function AktivitaetenWidget(props: WidgetProps) {
       {...props}
       actions={<ChartToggle active={showChart} onToggle={() => setShowChart((value) => !value)} />}
       badge={active.status === 'ready' && overdue > 0 ? <Pill tone="critical">{overdue} überfällig</Pill> : undefined}
-      toolbar={
-        showChart ? undefined : (
-          <div className="tabs tabs--compact" role="tablist" aria-label="Aufgabenart">
-            {TABS.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                role="tab"
-                aria-selected={tab === option.id}
-                className={`tab${tab === option.id ? ' is-active' : ''}`}
-                onClick={() => setTab(option.id)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        )
-      }
+      toolbar={showChart ? undefined : <TabSwitch label="Aufgabenart" options={TABS} value={tab} onChange={setTab} />}
     >
       {showChart ? (
         <TasksDueChart />
-      ) : tab === 'todo' ? (
+      ) : tab === 'myday' ? (
         <PagedRows
-          list={todos}
-          empty="Keine offenen Aufgaben"
-          renderItem={(todo) => (
-            <Row
-              key={todo.id}
-              urgency={dueUrgency(todo, todo.importance === 'high')}
-              title={todo.title}
-              meta={`${todo.list} · ${todo.statusLabel}`}
-              tags={todo.importance === 'high' ? <Pill tone="critical">Wichtig</Pill> : undefined}
-              aside={<DueLabel item={todo} />}
-            />
-          )}
+          list={myDay}
+          empty="Nichts für heute fällig und nichts überfällig"
+          renderItem={(item) => <TaskRow key={`${item.source}-${item.id}`} item={item} showSource />}
         />
+      ) : tab === 'todo' ? (
+        <PagedRows list={todos} empty="Keine offenen Aufgaben" renderItem={(item) => <TaskRow key={item.id} item={item} />} />
       ) : (
         <PagedRows
           list={plannerTasks}
           empty="Keine offenen Planner-Aufgaben, die dir zugewiesen sind"
-          renderItem={(task) => (
-            <Row
-              key={task.id}
-              urgency={dueUrgency(task)}
-              title={task.title}
-              meta={
-                <>
-                  <strong>{task.plan}</strong> · {task.statusLabel}
-                </>
-              }
-              aside={<DueLabel item={task} />}
-            />
-          )}
+          renderItem={(item) => <TaskRow key={item.id} item={item} />}
         />
       )}
     </WidgetFrame>

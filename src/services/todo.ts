@@ -1,6 +1,7 @@
 import { MicrosoftTo_Do_Business_Service as ToDoService } from '../generated/services/MicrosoftTo_Do_Business_Service'
 import type { ToDo_V2, ToDo_V2importance, ToDo_V2status } from '../generated/models/MicrosoftTo_Do_Business_Model'
 import { timelineItem, type TimelineItem } from '../lib/chartData'
+import { sharedRequest } from '../lib/sharedRequest'
 import { runConnector } from './Connector'
 
 // ListToDosByFolderV2 liefert ohne $top nur 10 Aufgaben je Liste und kann nicht nach Status filtern.
@@ -19,26 +20,38 @@ export interface TodoRow {
   id: string
   title: string
   list: string
+  /** Aufgabe liegt in der Standardliste „Aufgaben“ - dorthin synchronisiert Exchange auch CRM-Aufgaben */
+  defaultList: boolean
   status: ToDo_V2status
   statusLabel: string
   importance: ToDo_V2importance
   /** Fälligkeit als YYYY-MM-DD ohne Uhrzeit, null wenn keine gesetzt ist. */
   dueDate: string | null
+  /** Zeitpunkt der Erinnerung (ISO), null ohne aktive Erinnerung */
+  reminder: string | null
   modified: string | null
   created: string | null
   completed: string | null
 }
 
-function toRow(task: ToDo_V2, list: string): TodoRow {
+// Der Connector liefert Zeitpunkte ohne Zonenangabe - sie sind UTC.
+function utcTimestamp(value: string | undefined): string | null {
+  if (!value) return null
+  return /(?:[zZ]|[+-]\d{2}:\d{2})$/.test(value) ? value : `${value}Z`
+}
+
+function toRow(task: ToDo_V2, list: string, defaultList: boolean): TodoRow {
   const status = task.status ?? 'notStarted'
   return {
     id: task.id ?? '',
     title: task.title || 'Ohne Titel',
     list,
+    defaultList,
     status,
     statusLabel: STATUS_LABELS[status],
     importance: task.importance ?? 'normal',
     dueDate: task.dueDateTime?.dateTime?.slice(0, 10) || null,
+    reminder: task.isReminderOn ? utcTimestamp(task.reminderDateTime?.dateTime) : null,
     modified: task.lastModifiedDateTime ?? null,
     created: task.createdDateTime ?? null,
     completed: task.completedDateTime?.dateTime ?? null,
@@ -60,7 +73,7 @@ async function listAllOwnTodos(): Promise<TodoRow[]> {
   // Die Liste „Gekennzeichnete E-Mails“ enthält keine echten Aufgaben und bleibt ebenfalls außen vor.
   const folders = (lists ?? []).flatMap((list) =>
     list.id && list.isOwner !== false && list.wellknownListName !== 'flaggedEmails'
-      ? [{ id: list.id, name: list.displayName || 'Aufgaben' }]
+      ? [{ id: list.id, name: list.displayName || 'Aufgaben', defaultList: list.wellknownListName === 'defaultList' }]
       : [],
   )
 
@@ -70,7 +83,7 @@ async function listAllOwnTodos(): Promise<TodoRow[]> {
       const tasks = await runConnector(`To-Do: ListToDosByFolderV2 (${folder.name})`, () =>
         ToDoService.ListToDosByFolderV2(folder.id, TASKS_PER_LIST),
       )
-      return (tasks ?? []).map((task) => toRow(task, folder.name))
+      return (tasks ?? []).map((task) => toRow(task, folder.name, folder.defaultList))
     }),
   )
 
@@ -85,12 +98,15 @@ async function listAllOwnTodos(): Promise<TodoRow[]> {
   return rows
 }
 
+// Mehrere Tabs, Diagramme und die Suche fragen kurz nacheinander dieselben Listen ab - eine Anfrage für alle.
+const ownTodos = sharedRequest(listAllOwnTodos)
+
 /** Offene Aufgaben aus allen To-Do-Listen des angemeldeten Benutzers. */
 export async function listMyOpenTodos(): Promise<TodoRow[]> {
-  return (await listAllOwnTodos()).filter((row) => row.status !== 'completed').sort(compareTodos)
+  return (await ownTodos()).filter((row) => row.status !== 'completed').sort(compareTodos)
 }
 
 /** Anlage- und Erledigungszeitpunkte aller eigenen Aufgaben - für den Auslastungsverlauf. */
 export async function listMyTodoTimeline(): Promise<TimelineItem[]> {
-  return (await listAllOwnTodos()).flatMap((row) => timelineItem(row.created, row.status === 'completed' ? (row.completed ?? row.modified) : null))
+  return (await ownTodos()).flatMap((row) => timelineItem(row.created, row.status === 'completed' ? (row.completed ?? row.modified) : null))
 }

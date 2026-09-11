@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import './App.css'
 import knkLogo from './assets/knk-logo.jpg'
 import GlobalSearch from './components/GlobalSearch'
+import { useTheme, type Theme } from './hooks/useTheme'
 import type { WidgetDef, WidgetProps, WidgetSize } from './components/widgetTypes'
 import AktivitaetenWidget from './widgets/AktivitaetenWidget'
 import AuslastungWidget from './widgets/AuslastungWidget'
@@ -116,6 +117,34 @@ function PencilIcon() {
   )
 }
 
+function ThemeSwitch({ theme, onToggle }: { theme: Theme; onToggle: () => void }) {
+  const dark = theme === 'dark'
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={dark}
+      aria-label="Dunkles Design"
+      title={dark ? 'Zu hellem Design wechseln' : 'Zu dunklem Design wechseln'}
+      className="theme-switch"
+      onClick={onToggle}
+    >
+      <span className="theme-switch-knob" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          {dark ? (
+            <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" />
+          ) : (
+            <>
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+            </>
+          )}
+        </svg>
+      </span>
+    </button>
+  )
+}
+
 function CheckIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -125,6 +154,7 @@ function CheckIcon() {
 }
 
 function App() {
+  const { theme, toggleTheme } = useTheme()
   const [roleId, setRoleId] = useState(ROLES[0].id)
   const [editing, setEditing] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -284,6 +314,7 @@ function App() {
                 Bearbeiten
               </button>
             )}
+            <ThemeSwitch theme={theme} onToggle={toggleTheme} />
           </div>
         </header>
 

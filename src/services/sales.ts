@@ -1,10 +1,10 @@
-import { getContext } from '@microsoft/power-apps/app'
 import { Leadsstatuscode, type Leads } from '../generated/models/LeadsModel'
 import { Opportunitiesstatuscode, type Opportunities } from '../generated/models/OpportunitiesModel'
 import type { Page } from '../hooks/usePagedList'
 import { timelineItem, type TimelineItem } from '../lib/chartData'
+import { crmContext } from './crmContext'
 import { choiceLabel, crmRecordUrl, lookupName } from './Dataverse'
-import { activitiesTable, leadsTable, opportunitiesTable, systemUsersTable } from './tables'
+import { activitiesTable, leadsTable, opportunitiesTable } from './tables'
 
 export type SalesKind = 'lead' | 'opportunity'
 
@@ -35,37 +35,6 @@ export interface SalesCursor {
 
 const PAGE_SIZE = 10
 const EMAIL_ACTIVITY_TYPE_CODE = 4202
-
-interface SalesContext {
-  userId: string
-  orgUrl?: string
-}
-
-let contextPromise: Promise<SalesContext> | null = null
-
-async function resolveSalesContext(): Promise<SalesContext> {
-  const context = await getContext()
-  const aadObjectId = context.user.objectId
-  if (!aadObjectId) throw new Error('Keine Azure-AD-Objekt-ID im App-Kontext gefunden')
-  const users = await systemUsersTable.getAll({
-    select: ['systemuserid'],
-    filter: `azureactivedirectoryobjectid eq ${aadObjectId}`,
-    top: 1,
-  })
-  if (!users[0]) throw new Error('Kein Dataverse-Benutzer zur aktuellen Anmeldung gefunden')
-  return { userId: users[0].systemuserid, orgUrl: context.app.dataverseOrgUrl }
-}
-
-/** Dataverse-Benutzer und Org-URL, einmal pro Sitzung ermittelt. */
-function salesContext(): Promise<SalesContext> {
-  if (!contextPromise) {
-    contextPromise = resolveSalesContext().catch((error: unknown) => {
-      contextPromise = null
-      throw error
-    })
-  }
-  return contextPromise
-}
 
 function ownOpenFilter(userId: string) {
   return `statecode eq 0 and _ownerid_value eq ${userId}`
@@ -135,7 +104,7 @@ function toOpportunityRow(opportunity: Opportunities, orgUrl: string | undefined
 /** Eigene offene Leads, stapelweise. */
 export async function loadLeadsPage(cursor: SalesCursor | undefined): Promise<Page<SalesRow, SalesCursor>> {
   const current = cursor ?? { phase: 'dated' }
-  const { userId, orgUrl } = await salesContext()
+  const { userId, orgUrl } = await crmContext()
   const page = await leadsTable.getPage({
     ...phaseQuery(userId, current),
     select: LEAD_FIELDS,
@@ -149,7 +118,7 @@ export async function loadLeadsPage(cursor: SalesCursor | undefined): Promise<Pa
 /** Eigene offene Verkaufschancen, stapelweise. */
 export async function loadOpportunitiesPage(cursor: SalesCursor | undefined): Promise<Page<SalesRow, SalesCursor>> {
   const current = cursor ?? { phase: 'dated' }
-  const { userId, orgUrl } = await salesContext()
+  const { userId, orgUrl } = await crmContext()
   const page = await opportunitiesTable.getPage({
     // Kein $select: falsche OData-Feldnamen für den polymorphen Lookup "customerid" führten zu Fehlern.
     ...phaseQuery(userId, current),
@@ -164,21 +133,21 @@ export async function loadOpportunitiesPage(cursor: SalesCursor | undefined): Pr
 
 /** Alle eigenen offenen Leads auf einmal, ohne Aktivitätsabfrage - für die Suche. */
 export async function listOwnOpenLeads(): Promise<SalesRow[]> {
-  const { userId, orgUrl } = await salesContext()
+  const { userId, orgUrl } = await crmContext()
   const leads = await leadsTable.getAll({ select: LEAD_FIELDS, filter: ownOpenFilter(userId) })
   return leads.map((lead) => toLeadRow(lead, orgUrl, null))
 }
 
 /** Alle eigenen offenen Verkaufschancen auf einmal, ohne Aktivitätsabfrage - für die Suche. */
 export async function listOwnOpenOpportunities(): Promise<SalesRow[]> {
-  const { userId, orgUrl } = await salesContext()
+  const { userId, orgUrl } = await crmContext()
   const opportunities = await opportunitiesTable.getAll({ filter: ownOpenFilter(userId) })
   return opportunities.map((opportunity) => toOpportunityRow(opportunity, orgUrl, null))
 }
 
 /** Eigene Leads und Verkaufschancen mit Anlage- und Abschlusszeitpunkt, soweit sie seit `since` offen waren - für den Auslastungsverlauf. */
 export async function listSalesTimeline(since: Date): Promise<Record<SalesKind, TimelineItem[]>> {
-  const { userId } = await salesContext()
+  const { userId } = await crmContext()
   // Geschlossene Datensätze nur, wenn sie seit Beginn des Zeitraums geändert - also frühestens dann geschlossen - wurden.
   const filter = `_ownerid_value eq ${userId} and (statecode eq 0 or modifiedon ge ${since.toISOString()})`
   const [leads, opportunities] = await Promise.all([
@@ -196,7 +165,7 @@ export async function listSalesTimeline(since: Date): Promise<Record<SalesKind, 
 
 /** Anzahl und Summe der geschätzten Umsätze aller eigenen offenen Datensätze - unabhängig davon, wie viel angezeigt wird. */
 export async function loadSalesTotals(): Promise<Record<SalesKind, SalesTotals>> {
-  const { userId } = await salesContext()
+  const { userId } = await crmContext()
   const filter = ownOpenFilter(userId)
   const [leads, opportunities] = await Promise.all([
     leadsTable.getAll({ select: ['leadid', 'estimatedvalue'], filter }),

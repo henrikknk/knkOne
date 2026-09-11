@@ -40,9 +40,10 @@
   --sidebar-hover: rgba(255, 255, 255, 0.1);
   --sidebar-active: rgba(255, 255, 255, 0.18);
 
-  /* Dashboard-Hintergrund: Grundfarbe, nach unten mit Weiß aufgehellt */
-  --dashboard-bg-start: #004576;
-  --dashboard-bg-end: color-mix(in srgb, #004576 50%, #ffffff);
+  /* Dashboard-Hintergrund: Grundfarbe mit Weißanteil, nach unten weiter aufgehellt.
+     Oben bleibt es dunkel genug für die weiße Kopfzeile (Text ≥ 4.5:1). */
+  --dashboard-bg-start: color-mix(in srgb, #004576 85%, #ffffff);
+  --dashboard-bg-end: color-mix(in srgb, #004576 30%, #ffffff);
 
   --radius-sm: 6px;
   --radius: 10px;
@@ -61,6 +62,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dunkles Design: ohne eigene Wahl nach Betriebssystem, per Umschalter über data-theme erzwungen.
+   Beide Blöcke müssen dieselben Werte enthalten. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --brand: #5aa7e0;
@@ -89,11 +92,44 @@
     --series-5: #d55181;
     --sidebar-bg: #0a2a42;
     --sidebar-bg-strong: #061b2b;
-    --dashboard-bg-start: #0a2a42;
-    --dashboard-bg-end: #2a5577;
+    --dashboard-bg-start: #0e3452;
+    --dashboard-bg-end: #3f7299;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px -14px rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }
+}
+
+:root[data-theme='dark'] {
+  --brand: #5aa7e0;
+  --brand-hover: #7bb9e8;
+  --brand-strong: #0a2233;
+  --brand-soft: #14304a;
+  --brand-contrast: #06131d;
+  --bg: #0c141b;
+  --surface: #131e27;
+  --surface-2: #0f1820;
+  --border: #22313d;
+  --border-strong: #2f414f;
+  --text: #e6edf2;
+  --text-muted: #9aaab7;
+  --text-subtle: #7d8d99;
+  --critical: #ff8a80;
+  --critical-soft: #3a1d1b;
+  --warning: #f3b75b;
+  --warning-soft: #37290f;
+  --success: #6fcf8f;
+  --success-soft: #15301f;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --sidebar-bg: #0a2a42;
+  --sidebar-bg-strong: #061b2b;
+  --dashboard-bg-start: #0e3452;
+  --dashboard-bg-end: #3f7299;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px -14px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
 }
 
 * {
