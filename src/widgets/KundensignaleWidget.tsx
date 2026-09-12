@@ -10,7 +10,7 @@ const PERPLEXITY_ENDPOINT = 'https://api.perplexity.ai/chat/completions'
 
 // Schalter zum Sparen von Perplexity-Tokens: auf false setzen, um die Live-Abfrage abzuschalten.
 // Aktiv lädt das Widget die Signale beim Öffnen der App und bietet einen Knopf zum Neuladen.
-const KUNDENSIGNALE_LIVE_ENABLED = true
+const KUNDENSIGNALE_LIVE_ENABLED = false
 
 // Kundenliste für die Kundensignale.
 const KNK_CUSTOMERS = [
