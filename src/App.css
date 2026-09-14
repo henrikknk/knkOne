@@ -191,7 +191,8 @@
 .widget-titles { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .widget-title { font-size: 15px; font-weight: 650; line-height: 1.25; letter-spacing: -0.005em; }
 .widget-subtitle { font-size: 12px; color: var(--text-subtle); }
-.widget-badge { flex: none; }
+/* Der Kopf trägt inzwischen mehrere Kennzahlen nebeneinander */
+.widget-badge { flex: none; display: flex; align-items: center; gap: 4px; }
 .widget-actions { display: flex; align-items: center; gap: 4px; flex: none; }
 .widget-action {
   display: inline-flex; align-items: center; justify-content: center;
@@ -232,6 +233,11 @@
 .row--critical::before { background: var(--critical); }
 .row--warning::before { background: var(--warning); }
 .row--muted .row-title { color: var(--text-muted); font-weight: 500; }
+/* Ungelesenes hebt den ganzen Eintrag hervor. Muss nach --critical und :hover stehen, damit es gewinnt;
+   die linke Kante bleibt dabei unangetastet, die gehört weiter der Dringlichkeit. */
+.row--unread { background: color-mix(in srgb, var(--brand) 8%, transparent); }
+.row--unread:hover { background: color-mix(in srgb, var(--brand) 14%, transparent); }
+.row--unread .row-title { color: var(--text); font-weight: 700; }
 .row-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
 .row-title { font-size: 13.5px; font-weight: 600; color: var(--text); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .row-title a { color: inherit; text-decoration: none; }
@@ -250,6 +256,18 @@
 .row-expand:focus-visible { outline: none; box-shadow: var(--focus); }
 .row-expand svg { transition: transform 0.15s ease; }
 .row-expand.is-expanded svg { transform: rotate(180deg); }
+/* Kontrollkästchen je Ticket - gleiche Größe wie die Aufklapp-Schaltfläche, grün beim Überfahren */
+.row-mark-read {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 26px; height: 26px; border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-muted); cursor: pointer;
+}
+.row-mark-read:hover { background: var(--success-soft); color: var(--success); }
+.row-mark-read:focus-visible { outline: none; box-shadow: var(--focus); }
+/* Angehakt: bleibt lesbar, tritt aber zurück, bis die Zeile berührt wird - sonst Symbolrauschen in jeder Zeile */
+.row-mark-read.is-read { opacity: 0.5; }
+.row:hover .row-mark-read.is-read, .row-mark-read.is-read:hover, .row-mark-read.is-read:focus-visible { opacity: 1; }
+.row-mark-read.is-read:hover { background: var(--surface-2); color: var(--text); }
 .row-details { margin-top: 6px; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); }
 .row-description { max-height: 240px; overflow-y: auto; font-size: 12.5px; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
 .row-details-status { font-size: 12.5px; color: var(--text-muted); }
@@ -308,6 +326,24 @@ a.crm-ref:hover { border-color: var(--brand); color: var(--brand); }
 .issue-type--cr { color: var(--issue-cr); background: var(--issue-cr-soft); border-color: color-mix(in srgb, var(--issue-cr) 30%, transparent); }
 .issue-type--ticket { color: var(--brand); background: var(--brand-soft); border-color: color-mix(in srgb, var(--brand) 30%, transparent); }
 .issue-updated { font-size: 12px; color: var(--text-subtle); white-space: nowrap; }
+
+/* Jüngster Kommentar eines Tickets - immer sichtbar, ungelesen farbig und fett */
+.issue-comment { min-width: 0; margin-top: 3px; }
+.issue-comment-head { display: flex; align-items: center; gap: 5px; min-width: 0; font-size: 12px; color: var(--text-subtle); }
+.issue-comment-head svg { flex: none; }
+.issue-comment-author { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.issue-comment-when { flex: none; white-space: nowrap; }
+.issue-comment-new { flex: none; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; font-size: 10.5px; }
+/* Die ganze Kopfzeile ist die Schaltfläche zum Aufklappen - Knopf-Grundstil zurücksetzen */
+.issue-comment-toggle { width: 100%; padding: 0; border: 0; background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.issue-comment-toggle:hover { color: var(--text); }
+.issue-comment-toggle:focus-visible { outline: none; box-shadow: var(--focus); border-radius: 3px; }
+.issue-comment-chevron { margin-left: auto; transition: transform 0.15s ease; }
+.issue-comment-toggle.is-expanded .issue-comment-chevron { transform: rotate(180deg); }
+.issue-comment--unread .issue-comment-head { font-weight: 600; }
+.issue-comment--unread.issue-comment--internal .issue-comment-head { color: var(--comment-internal); }
+.issue-comment--unread.issue-comment--external .issue-comment-head { color: var(--comment-external); }
+
 
 /* Budget-Meter: die Füllung trägt den Zustand, die Spur ist eine hellere Stufe derselben Farbe */
 .meter { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }

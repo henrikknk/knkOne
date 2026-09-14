@@ -37,6 +37,12 @@
   --issue-cr: #5b3cc4;
   --issue-cr-soft: #efeafd;
 
+  /* Neue Jira-Kommentare: interne Notiz und Kundenkommentar, klar verschieden von --critical und --warning */
+  --comment-internal: #6b3fa0;
+  --comment-internal-soft: #f3ecfb;
+  --comment-external: #0f6f78;
+  --comment-external-soft: #e2f3f4;
+
   --sidebar-bg: var(--brand);
   --sidebar-bg-strong: var(--brand-strong);
   --sidebar-text: rgba(255, 255, 255, 0.78);
@@ -96,6 +102,10 @@
     --series-5: #d55181;
     --issue-cr: #b7a4ff;
     --issue-cr-soft: #2a2346;
+    --comment-internal: #c7a9f0;
+    --comment-internal-soft: #2b2140;
+    --comment-external: #6fd0d8;
+    --comment-external-soft: #123134;
     --sidebar-bg: #0a2a42;
     --sidebar-bg-strong: #061b2b;
     --dashboard-bg-start: #0e3452;
@@ -132,6 +142,10 @@
   --series-5: #d55181;
   --issue-cr: #b7a4ff;
   --issue-cr-soft: #2a2346;
+  --comment-internal: #c7a9f0;
+  --comment-internal-soft: #2b2140;
+  --comment-external: #6fd0d8;
+  --comment-external-soft: #123134;
   --sidebar-bg: #0a2a42;
   --sidebar-bg-strong: #061b2b;
   --dashboard-bg-start: #0e3452;

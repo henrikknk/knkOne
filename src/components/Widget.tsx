@@ -237,16 +237,24 @@ interface RowProps {
   aside?: ReactNode
   /** Zusatzinhalt unter Meta und Tags, z. B. eine aufgeklappte Beschreibung */
   details?: ReactNode
+  /** Wird beim Öffnen von `href` ausgelöst, z. B. um den Eintrag als gelesen zu markieren. */
+  onOpen?: () => void
+  /** Hebt den gesamten Eintrag hervor, z. B. weil es dort etwas Ungelesenes gibt. */
+  highlight?: boolean
 }
 
-/** Listeneintrag; die Dringlichkeit färbt die linke Kante und hebt kritische Einträge hervor. */
-export function Row({ urgency = 'normal', title, href, meta, tags, aside, details }: RowProps) {
+/**
+ * Listeneintrag. Zwei getrennte Kanäle: die Dringlichkeit färbt die linke Kante,
+ * `highlight` den Hintergrund - so überdeckt das eine nie das andere.
+ */
+export function Row({ urgency = 'normal', title, href, meta, tags, aside, details, onOpen, highlight }: RowProps) {
   return (
-    <li className={`row row--${urgency}`}>
+    <li className={`row row--${urgency}${highlight ? ' row--unread' : ''}`}>
       <div className="row-main">
         <div className="row-title">
           {href ? (
-            <a href={href} target="_blank" rel="noopener noreferrer">
+            // onAuxClick deckt den Mittelklick ab; Enter löst ohnehin click aus.
+            <a href={href} target="_blank" rel="noopener noreferrer" onClick={onOpen} onAuxClick={onOpen}>
               {title}
             </a>
           ) : (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Row, WidgetFrame, WidgetEmpty, WidgetNotice, WidgetSkeleton } from '../components/Widget'
 import type { WidgetProps } from '../components/widgetTypes'
+import { delay } from '../lib/delay'
 
 // Kein Secret hardcoden: der Key kommt aus .env.local (nicht eingecheckt), landet aber trotzdem im Browser-Bundle,
 // da dieser Aufruf clientseitig läuft. Perplexity erlaubt CORS, hat aber ein sehr enges Rate-Limit -
@@ -58,16 +59,6 @@ function sortSignalsByDateDesc(items: CustomerSignal[]): CustomerSignal[] {
     if (Number.isNaN(timeA)) return 1
     if (Number.isNaN(timeB)) return -1
     return timeB - timeA
-  })
-}
-
-function delay(ms: number, signal?: AbortSignal) {
-  return new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(resolve, ms)
-    signal?.addEventListener('abort', () => {
-      clearTimeout(timer)
-      reject(signal.reason)
-    })
   })
 }
 
