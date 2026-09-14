@@ -229,12 +229,15 @@
 .row::before { content: ''; position: absolute; left: 4px; top: 10px; bottom: 10px; width: 3px; border-radius: 99px; background: transparent; }
 .row + .row::after { content: ''; position: absolute; left: 14px; right: 10px; top: -1px; height: 1px; background: var(--border); }
 .row:hover { background: var(--surface-2); }
-.row--critical { background: color-mix(in srgb, var(--critical-soft) 70%, transparent); }
+/* Dringlichkeit: die linke Kante trägt sie, daneben läuft ein weicher Schimmer aus. Bewusst keine flächige
+   Einfärbung mehr - bei vielen überfälligen Einträgen wurde die Liste sonst zu einer durchgehend roten Fläche.
+   Als inset-Schatten statt background, damit Hover und Ungelesen-Hervorhebung daneben bestehen bleiben. */
+.row--critical { box-shadow: inset 40px 0 30px -32px color-mix(in srgb, var(--critical) 55%, transparent); }
 .row--critical::before { background: var(--critical); }
 .row--warning::before { background: var(--warning); }
 .row--muted .row-title { color: var(--text-muted); font-weight: 500; }
-/* Ungelesenes hebt den ganzen Eintrag hervor. Muss nach --critical und :hover stehen, damit es gewinnt;
-   die linke Kante bleibt dabei unangetastet, die gehört weiter der Dringlichkeit. */
+/* Ungelesenes hebt den ganzen Eintrag hervor. Muss nach :hover stehen, damit es gewinnt; Kante und Schimmer
+   der Dringlichkeit liegen auf einem eigenen Kanal und bleiben daneben sichtbar. */
 .row--unread { background: color-mix(in srgb, var(--brand) 8%, transparent); }
 .row--unread:hover { background: color-mix(in srgb, var(--brand) 14%, transparent); }
 .row--unread .row-title { color: var(--text); font-weight: 700; }
